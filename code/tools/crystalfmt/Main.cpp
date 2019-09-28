@@ -1,7 +1,7 @@
 
 // Copyright (C) 2019 Force67
 
-#include "formats/BigFile.h"
+#include "formats/TigerArc.h"
 
 int main(int argc, char** argv)
 {
@@ -17,9 +17,9 @@ int main(int argc, char** argv)
 	}
 
 	if (std::strstr(argv[1], ".tiger") && file.GetSize() > sizeof(TigerHeader)) {
-		BigFile bfile(file);
-		if (bfile.ExtractFile()) {
-			bfile.DebugPrintEntries();
+		TigerArc arc(file);
+		if (arc.Validate()) {
+			arc.DebugPrintEntries();
 		}
 	}
 

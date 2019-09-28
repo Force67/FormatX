@@ -27,7 +27,7 @@ struct TigerEntry
 
 static_assert(sizeof(TigerEntry) == 24, "Bad Entry size");
 
-class BigFile
+class TigerArc
 {
 	utl::File& file;
 	TigerHeader header{};
@@ -35,10 +35,14 @@ class BigFile
 
 	static constexpr uint32_t tigerMagic = 0x53464154;
 
+	void ExtractFile(const TigerEntry&);
+
 public:
 
-	BigFile(utl::File&);
-	bool ExtractFile();
+	TigerArc(utl::File&);
+
+	bool Validate();
+	void ExtractAll();
 
 	void DebugPrintEntries();
 };

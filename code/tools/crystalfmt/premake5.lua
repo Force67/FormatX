@@ -13,13 +13,15 @@ project "CrystalFMT"
 	
 	links
 	{
-		"shared"
+		"shared",
+		"zlib"
 	}
 
     includedirs
     {
         ".",
-		"../../shared"
+		"../../shared",
+		"../../ext/zlib"
     }
 
     files

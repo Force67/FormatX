@@ -62,6 +62,9 @@ workspace "FormatX"
 	group "util"
 	include "./shared"
 	
+	group "external"
+	include "ext/zlib"
+	
 -- Cleanup
 if _ACTION == "clean" then
     os.rmdir("../bin");
