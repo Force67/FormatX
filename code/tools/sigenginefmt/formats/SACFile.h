@@ -23,8 +23,8 @@ struct SACEntry
 	uint32_t unkOffset;
 	uint32_t isCompressed;
 	uint32_t dataOffset;
-	uint32_t uncompressedSize;
 	uint32_t compressedSize;
+	uint32_t uncompressedSize;
 	uint32_t unk0;
 	uint32_t unk1;
 	uint32_t unk2;
