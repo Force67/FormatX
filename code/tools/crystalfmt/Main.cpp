@@ -16,10 +16,22 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	if (std::strstr(argv[1], ".tiger") && file.GetSize() > sizeof(TigerHeader)) {
-		TigerArc arc(file);
-		if (arc.Validate()) {
-			arc.DebugPrintEntries();
+	if (std::strstr(argv[1], ".tiger") && file.GetSize() > 0) {
+
+		// can we handle this tiger file?
+		int v = ValidateTiger(file);
+		if (v == 0) {
+			std::puts("[!] Unknown tiger file!");
+			return -2;
+		}
+
+		switch (v) {
+		case 3:
+		{
+			TR9Tiger arc(file);
+			arc.ExtractAll();
+			break;
+		} 
 		}
 	}
 

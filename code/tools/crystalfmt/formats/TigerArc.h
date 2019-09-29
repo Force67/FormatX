@@ -4,45 +4,90 @@
 
 #include <utl/File.h>
 
+static constexpr uint32_t tigerMagic = 0x53464154;
+
+// same on v3 and v4
 struct TigerHeader
 {
 	uint32_t magic;
-	uint32_t version; // rise is v4
-	uint32_t unk;
+	uint32_t version; //3,4
+	uint32_t partsCount;
 	uint32_t numEntries;
-	uint32_t unk2;
+	uint32_t unk2; // 1
 	char platformName[32];
 };
 
-struct TigerEntry
+// new header for Shadow
+struct TigerHeaderV5
+{
+	uint32_t magic;
+	uint32_t version; //5
+	uint32_t partsCount;
+	uint32_t numEntries;
+	uint32_t unk2; // 1
+	uint32_t unk3;
+	char platformName[32];
+};
+
+// TR2013
+/*struct TigerEntryV3
 {
 	uint32_t nameHash;
 	uint32_t language;
 	uint32_t size;
 	uint32_t sizeCompressed;
+	uint32_t flags;
 	uint32_t offset;
-	uint16_t flags1;
-	uint16_t flags2;
+};*/
+
+struct TigerEntryV3
+{
+	uint32_t nameHash;
+	uint32_t locale;
+	uint32_t size;
+	uint32_t offset;
 };
 
-static_assert(sizeof(TigerEntry) == 24, "Bad Entry size");
+// RISE
+struct TigerEntryV4
+{
+	uint32_t crcNameHash;
+	uint32_t language;
+	uint32_t size;
+	uint32_t sizeCompressed;
+	uint32_t offset;
+	uint32_t flags;
+};
 
-class TigerArc
+// SHADOW
+struct TigerEntryV5
+{
+	uint64_t fnvNameHash;
+	uint64_t language;
+	uint32_t size;
+	uint32_t sizeCompressed;
+	uint32_t unk;
+	uint32_t offset;
+};
+
+static_assert(sizeof(TigerEntryV3) == 16, "Bad V3 Entry size");
+static_assert(sizeof(TigerEntryV4) == 24, "Bad V4 Entry size");
+static_assert(sizeof(TigerEntryV5) == 32, "Bad V5 Entry size");
+
+//TODO: IFile trait, for (De)Serialization
+
+// known Tiger Arc?
+int ValidateTiger(utl::File&);
+
+class TR9Tiger
 {
 	utl::File& file;
-	TigerHeader header{};
-	std::vector<TigerEntry> filelist{};
 
-	static constexpr uint32_t tigerMagic = 0x53464154;
-
-	void ExtractFile(const TigerEntry&);
+	TigerHeader hdr{};
+	std::vector<TigerEntryV3> entries;
 
 public:
 
-	TigerArc(utl::File&);
-
-	bool Validate();
+	TR9Tiger(utl::File&);
 	void ExtractAll();
-
-	void DebugPrintEntries();
 };

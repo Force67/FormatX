@@ -1,69 +1,68 @@
 
 // Copyright (C) Force67 2019
 
+#include <filesystem>
 #include "TigerArc.h"
 
-TigerArc::TigerArc(utl::File& f) :
+int ValidateTiger(utl::File& file)
+{
+	uint32_t magic = 0;
+	uint32_t version = 0;
+
+	file.Read(magic);
+	file.Read(version);
+
+	// 'TAFS'
+	if (magic != tigerMagic)
+		return false;
+
+	// todo: check platform
+
+	//for now...
+	if (version < 3 || version > 5)
+		return 0;
+
+	return version;
+}
+
+TR9Tiger::TR9Tiger(utl::File& f) :
 	file(f)
-{}
-
-bool TigerArc::Validate()
 {
-	if (file.IsOpen()) {
-		file.Read(header);
+	file.Seek(0, utl::seekMode::seek_set);
+	file.Read(hdr);
 
-		if (header.magic != tigerMagic)
-			return false;
-
-		if (header.version != 4) {
-			std::puts("[!] Bad Tiger version");
-			return false;
-		}
-
-		if (std::strcmp(header.platformName, "orbis-w") == 0) {
-			std::printf("[+] Opening PS4-Bigfile with %d entries\n", header.numEntries);
-		}
-		else if (std::strcmp(header.platformName, "pcx64-w") == 0) {
-			std::printf("[+] Opening PC-Bigfile with %d entries\n", header.numEntries);
-		}
-		else return false;
-
-		// read in all entries
-		filelist.resize(header.numEntries);
-		file.Read(filelist);
-	}
-
-	return true;
+	entries.resize(hdr.numEntries);
+	file.Read(entries);
 }
 
-void TigerArc::ExtractFile(const TigerEntry& entry)
+void TR9Tiger::ExtractAll()
 {
-	auto prev = file.Tell();
-	file.Seek(entry.offset, utl::seekMode::seek_set);
+	std::filesystem::create_directory("unp");
 
-	std::vector<uint8_t> data(entry.size);
-	file.Read(data);
-
-
-}
-
-void TigerArc::ExtractAll()
-{
-	for (auto& e : filelist)
-	{
-		if (e.sizeCompressed != 0) {
-			std::printf("[!]: We cant handle compressed tiger entry yet (%x)\n", e.nameHash);
+	int ec = 0;
+	int lv = 0;
+	for (auto& tre : entries) {
+		/*if (tre.sizeCompressed != 0) {
+			std::printf("[~] Unable to extract compressed file %x\n", tre.nameHash);
 			continue;
+		}*/
+
+		file.Seek(tre.offset, utl::seekMode::seek_set);
+
+		std::vector<uint8_t> data(tre.size);
+		file.Read(data);
+
+		utl::File writer("unp//" + std::to_string(tre.nameHash), utl::fileMode::write);
+		if (writer.IsOpen()) {
+			writer.Write(data);
 		}
 
-		ExtractFile(e);
-	}
-}
+		const int percent = (ec / (hdr.numEntries / 100));
+		if (lv != percent) {
+			std::printf("Progress %d%% (%d/%d)\n", percent, ec, hdr.numEntries);
+			lv = percent;
+		}
 
-void TigerArc::DebugPrintEntries()
-{
-	for (auto& e : filelist) {
-		std::printf("Entry: Hash: %x | Lang: %x | Size: (Z: %d, U :%d) | Offset %x | Flags (1: %x, 2: %x)\n",
-			e.nameHash, e.language, e.sizeCompressed, e.size, e.offset, e.flags1, e.flags2);
+		ec++;
 	}
 }
