@@ -14,7 +14,7 @@ int ValidateTiger(utl::File& file)
 
 	// 'TAFS'
 	if (magic != tigerMagic)
-		return false;
+		return 0;
 
 	// todo: check platform
 
@@ -42,11 +42,6 @@ void TR9Tiger::ExtractAll()
 	int ec = 0;
 	int lv = 0;
 	for (auto& tre : entries) {
-		/*if (tre.sizeCompressed != 0) {
-			std::printf("[~] Unable to extract compressed file %x\n", tre.nameHash);
-			continue;
-		}*/
-
 		file.Seek(tre.offset, utl::seekMode::seek_set);
 
 		std::vector<uint8_t> data(tre.size);

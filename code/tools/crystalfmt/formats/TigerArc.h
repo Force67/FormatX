@@ -91,3 +91,15 @@ public:
 	TR9Tiger(utl::File&);
 	void ExtractAll();
 };
+
+/*class TR10Tiger
+{
+	utl::File& file;
+	TigerHeader hdr{};
+	std::vector<TigerEntryV4> entries;
+
+public:
+
+	TR10Tiger(utl::File&);
+	void ExtractAll();
+};*/
