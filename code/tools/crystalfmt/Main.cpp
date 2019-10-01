@@ -18,20 +18,27 @@ int main(int argc, char** argv)
 
 	if (std::strstr(argv[1], ".tiger") && file.GetSize() > 0) {
 
-		// can we handle this tiger file?
-		int v = ValidateTiger(file);
-		if (v == 0) {
-			std::puts("[!] Unknown tiger file!");
-			return -2;
-		}
+		auto fmt = CreateTigerFMT(file);
+		if (fmt) {
+			auto res = fmt->Deserialize(file);
 
-		switch (v) {
-		case 3:
-		{
-			TR9Tiger arc(file);
-			arc.ExtractAll();
-			break;
-		} 
+			const char* possibleErr{ nullptr };
+			switch (res) {
+			case FileResult::badplatform: possibleErr = "Bad Tiger Platform"; break;
+			case FileResult::badversion: possibleErr = "Bad Tiger Version"; break;
+			case FileResult::success:
+			default:
+			{
+				fmt->ExtractAll(file);
+			}
+			}
+
+			if (possibleErr) {
+				std::printf("Tiger Extraction Err %s\n", possibleErr);
+			}
+		}
+		else {
+			std::puts("[!] Unknown tiger file version");
 		}
 	}
 
