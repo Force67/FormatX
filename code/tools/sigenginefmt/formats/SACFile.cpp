@@ -93,18 +93,18 @@ void SACFile::ExportFiles()
 			}
 
 			//option 1
-			//utl::File out(entryName, utl::fileMode::write);
-			//out.Write(data);
-			//out.Close();
+			utl::File out(entryName, utl::fileMode::write);
+			out.Write(data);
+			out.Close();
 
 			//option 2
-			FILE* out2;
-			fopen_s(&out2, entryName.c_str(), "wb");
-			if (out2 != NULL)
-			{
-				fwrite(data.data(), sizeof(uint8_t), data.size(), out2);
-				fclose(out2);
-			}
+			//FILE* out2;
+			//fopen_s(&out2, entryName.c_str(), "wb");
+			//if (out2 != NULL)
+			//{
+			//	fwrite(data.data(), sizeof(uint8_t), data.size(), out2);
+			//	fclose(out2);
+			//}
 		}
 	}
 }
