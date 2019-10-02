@@ -2,6 +2,7 @@
 // Copyright (C) 2019 Force67
 
 #include "formats/TigerArc.h"
+#include <zlib.h>
 
 int main(int argc, char** argv)
 {

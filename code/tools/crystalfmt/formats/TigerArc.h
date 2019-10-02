@@ -4,6 +4,8 @@
 
 #include <utl/File.h>
 #include <fileformat.h>
+#include <zlib.h>
+#include <fstream>
 
 static constexpr uint32_t tigerMagic = 0x53464154;
 
