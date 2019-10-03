@@ -8,11 +8,20 @@ namespace utl {
 	class File;
 }
 
+enum class FileResult
+{
+	success,
+	badmagic,
+	badversion,
+	badplatform,
+};
+
 class IFileFormat
 {
 public:
 
 	virtual ~IFileFormat() = default;
-	virtual void Serialize(utl::File&) = 0;
-	virtual void Deserialize(const utl::File&) = 0;
+	virtual FileResult Serialize(utl::File&) { return FileResult::success; }
+	virtual FileResult Deserialize(utl::File&) = 0;
+	virtual FileResult ExtractAll(utl::File&) { return FileResult::success; }
 };

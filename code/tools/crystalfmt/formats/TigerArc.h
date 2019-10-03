@@ -3,6 +3,9 @@
 // Copyright (C) Force67 2019
 
 #include <utl/File.h>
+#include <fileformat.h>
+#include <zlib.h>
+#include <fstream>
 
 static constexpr uint32_t tigerMagic = 0x53464154;
 
@@ -30,16 +33,6 @@ struct TigerHeaderV5
 };
 
 // TR2013
-/*struct TigerEntryV3
-{
-	uint32_t nameHash;
-	uint32_t language;
-	uint32_t size;
-	uint32_t sizeCompressed;
-	uint32_t flags;
-	uint32_t offset;
-};*/
-
 struct TigerEntryV3
 {
 	uint32_t nameHash;
@@ -53,11 +46,14 @@ struct TigerEntryV4
 {
 	uint32_t crcNameHash;
 	uint32_t language;
-	uint32_t size;
+	uint32_t size; //verified
 	uint32_t sizeCompressed;
 	uint32_t offset;
-	uint32_t flags;
+	uint16_t flags1;
+	uint16_t flags2;
 };
+
+//4+4+4+4+2+2+4
 
 // SHADOW
 struct TigerEntryV5
@@ -74,32 +70,6 @@ static_assert(sizeof(TigerEntryV3) == 16, "Bad V3 Entry size");
 static_assert(sizeof(TigerEntryV4) == 24, "Bad V4 Entry size");
 static_assert(sizeof(TigerEntryV5) == 32, "Bad V5 Entry size");
 
-//TODO: IFile trait, for (De)Serialization
+static_assert(sizeof(TigerHeader) == 52, "Bad V3/V4 Header size");
 
-// known Tiger Arc?
-int ValidateTiger(utl::File&);
-
-class TR9Tiger
-{
-	utl::File& file;
-
-	TigerHeader hdr{};
-	std::vector<TigerEntryV3> entries;
-
-public:
-
-	TR9Tiger(utl::File&);
-	void ExtractAll();
-};
-
-/*class TR10Tiger
-{
-	utl::File& file;
-	TigerHeader hdr{};
-	std::vector<TigerEntryV4> entries;
-
-public:
-
-	TR10Tiger(utl::File&);
-	void ExtractAll();
-};*/
+std::unique_ptr<IFileFormat> CreateTigerFMT(utl::File&);
