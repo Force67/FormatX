@@ -46,11 +46,14 @@ struct TigerEntryV4
 {
 	uint32_t crcNameHash;
 	uint32_t language;
-	uint32_t size;
+	uint32_t size; //verified
 	uint32_t sizeCompressed;
 	uint32_t offset;
-	uint32_t flags;
+	uint16_t flags1;
+	uint16_t flags2;
 };
+
+//4+4+4+4+2+2+4
 
 // SHADOW
 struct TigerEntryV5
@@ -66,5 +69,7 @@ struct TigerEntryV5
 static_assert(sizeof(TigerEntryV3) == 16, "Bad V3 Entry size");
 static_assert(sizeof(TigerEntryV4) == 24, "Bad V4 Entry size");
 static_assert(sizeof(TigerEntryV5) == 32, "Bad V5 Entry size");
+
+static_assert(sizeof(TigerHeader) == 52, "Bad V3/V4 Header size");
 
 std::unique_ptr<IFileFormat> CreateTigerFMT(utl::File&);

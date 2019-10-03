@@ -64,7 +64,8 @@ public:
 		file.Seek(0, utl::seekMode::seek_set);
 		file.Read(hdr);
 
-		if (std::strcmp(hdr.platformName, "pc-w") != 0)
+		if (std::strcmp(hdr.platformName, "orbis-w") != 0 &&
+			std::strcmp(hdr.platformName, "pc-w") != 0)
 			return FileResult::badplatform;
 
 		fileList.resize(hdr.numEntries);
@@ -84,9 +85,7 @@ public:
 	FileResult ExtractAll(utl::File& file) override
 	{
 		std::string pfn(hdr.platformName);
-
-		std::filesystem::create_directory("unp");
-		std::filesystem::create_directory("unp\\" + pfn);
+		std::filesystem::create_directories("unp\\" + pfn);
 
 		int ec = 0;
 		int lv = 0;
@@ -118,10 +117,21 @@ public:
 	}
 };
 
+struct TigerEntryVX
+{
+	uint32_t crcNameHash;
+	uint32_t language;
+	uint32_t size; //verified
+	uint32_t sizeCompressed;
+	uint16_t flags1;
+	uint16_t flags2;
+	uint32_t offset;
+};
+
 class TR10Tiger final : public IFileFormat
 {
 	TigerHeader hdr{};
-	std::vector<TigerEntryV4> fileList;
+	std::vector<TigerEntryVX> fileList;
 
 public:
 
@@ -130,7 +140,8 @@ public:
 		file.Seek(0, utl::seekMode::seek_set);
 		file.Read(hdr);
 
-		if (std::strcmp(hdr.platformName, "orbis-w") != 0)
+		if (std::strcmp(hdr.platformName, "orbis-w") != 0 &&
+			std::strcmp(hdr.platformName, "pcx64-w") != 0)
 			return FileResult::badplatform;
 
 		fileList.resize(hdr.numEntries);
@@ -149,15 +160,14 @@ public:
 	FileResult ExtractAll(utl::File& file) override
 	{
 		std::string pfn(hdr.platformName);
-
-		std::filesystem::create_directory("unp");
-		std::filesystem::create_directory("unp\\" + pfn);
+		std::filesystem::create_directories("unp\\" + pfn);
 
 		int ec = 0;
 		int lv = 0;
 		for (auto& tre : fileList) {
 			file.Seek(tre.offset, utl::seekMode::seek_set);
 
+#if 1
 			std::vector<uint8_t> data(tre.size);
 			file.Read(data);
 
@@ -165,12 +175,15 @@ public:
 			if (writer.IsOpen()) {
 				writer.Write(data);
 			}
+#endif
 
 			const int percent = (ec / (hdr.numEntries / 100));
 			if (lv != percent) {
-				std::printf("Progress %d%% (%d/%d)\n", percent, ec, hdr.numEntries);
+				//std::printf("Progress %d%% (%d/%d)\n", percent, ec, hdr.numEntries);
 				lv = percent;
 			}
+//#define HIDWORD(x)  (*((uint32_t*)&(x)+1))
+//			std::printf("CRC HASH 0x%llx, COMPRESSED %d, FLAGS1 %d, FLAGS2 %x\n", tre.crcNameHash, tre.sizeCompressed, tre.flags1, HIDWORD(tre.flags2));
 
 			ec++;
 		}

@@ -58,6 +58,7 @@ workspace "FormatX"
 	--include "tools/_template"
 	include "tools/crystalfmt"
 	include "tools/northlightfmt"
+	include "tools/tboifmt"
 	
 	group "util"
 	include "./shared"
