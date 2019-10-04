@@ -8,7 +8,7 @@
 
 namespace fs = std::filesystem;
 
-std::string SACFile::getEntryName(SACEntry entry)
+std::string SACFile::getEntryName(utl::File& file, SACEntry& entry)
 {
 	auto offset = (entry.nameOffset & 0x7FFFFFFF) - 4;
 	file.Seek(offset, utl::seekMode::seek_set);
@@ -18,11 +18,23 @@ std::string SACFile::getEntryName(SACEntry entry)
 	return name;
 }
 
-SACFile::SACFile(utl::File& f) :
-	file(f)
-{}
+void recurseDirectories(std::vector<std::string>& files, const fs::directory_entry& entry)
+{
+	if (entry.is_directory()) {
+		for (const auto& entry : fs::directory_iterator(entry))
+		{
+			if (entry.is_regular_file()) files.push_back(entry.path().string());
+			recurseDirectories(files, entry);
+		}
+	}
+}
 
-bool SACFile::Validate()
+void SACFile::SetName(std::string& name)
+{
+	this->name = name;
+}
+
+FileResult SACFile::Deserialize(utl::File& file)
 {
 	if (file.IsOpen()) {
 		file.Read(header);
@@ -30,7 +42,7 @@ bool SACFile::Validate()
 		if (header.sacMagic0 != sacMagic || 
 			header.sigMagic0 != sigMagic ||
 			header.sacMagic1 != sacMagic)
-			return false;
+			return FileResult::badmagic;
 		
 		std::printf("[+] Opening Signal Archive with %d entries\n", header.numEntries);
 		file.Seek(((header.dictionaryOffset) & 0x7FFFFFFF) + 4, utl::seekMode::seek_set);
@@ -39,22 +51,52 @@ bool SACFile::Validate()
 		file.Read(filelist);
 	}
 
-	return true;
+	return FileResult::success;
 }
 
-void SACFile::ExportFiles()
+FileResult SACFile::Serialize(utl::File& file)
+{
+	std::vector<std::string> files = std::vector<std::string>();
+	std::string dirPath = name + "\\";
+	for (const auto& entry : fs::directory_iterator(dirPath))
+	{
+		if (entry.is_regular_file()) files.push_back(entry.path().string());
+		recurseDirectories(files, entry);
+	}
+
+	for (auto& entry : files)
+	{
+		this->filelist.push_back(SACEntry());
+	}
+
+	this->header.sacMagic0 = sacMagic;
+	this->header.sigMagic0 = sigMagic;
+	this->header.sigVersion = 0x22142;
+	this->header.sacMagic1 = sacMagic;
+	this->header.dictionaryOffset = sizeof(SACHeader)+4;
+	this->header.numEntries = this->filelist.size();
+
+	file.Write(this->header);
+	file.Write((uint32_t)0); //padding i think
+	file.Write(this->filelist);
+
+	return FileResult::success;
+}
+
+FileResult SACFile::ExtractAll(utl::File& file)
 {
 	if (file.IsOpen())
 	{
 		for (auto& e : filelist) {
 			//get entry name and then print into console, store name too.
-			auto entryName = this->getEntryName(e);
+			auto entryName = this->getEntryName(file, e);
 			std::printf("%s\n", entryName.c_str());
 			std::istringstream ns;
 			ns.str(entryName);
 
 			//build directory path.
-			std::string dirPath;
+			std::string temp = name;
+			std::string dirPath = temp.erase(this->name.size()-5) + "\\";
 			for (std::string line; std::getline(ns, line, '\\'); ) {
 				if (!strchr(line.c_str(), '.'))
 					dirPath += (line + "\\");
@@ -91,34 +133,10 @@ void SACFile::ExportFiles()
 				err = inflateEnd(&stream);
 				if (err != Z_OK) __debugbreak();
 			}
-
-			//option 1
-			utl::File out(entryName, utl::fileMode::write);
+			utl::File out(temp + "\\" + entryName, utl::fileMode::write);
 			out.Write(data);
 			out.Close();
-
-			//option 2
-			//FILE* out2;
-			//fopen_s(&out2, entryName.c_str(), "wb");
-			//if (out2 != NULL)
-			//{
-			//	fwrite(data.data(), sizeof(uint8_t), data.size(), out2);
-			//	fclose(out2);
-			//}
 		}
-	}
-}
-
-void SACFile::DebugPrintEntries()
-{
-	if (file.IsOpen())
-	{
-		for (auto& e : filelist) {
-			std::string& name = this->getEntryName(e);
-			std::printf("Entry: Name %s \n", name.c_str());
-			//std::printf("Entry: Hash: %x | Lang: %x | Size: (Z: %d, U :%d) | Offset %x | Flags (1: %x, 2: %x)\n",
-			//	e.nameHash, e.language, e.sizeCompressed, e.size, e.offset, e.flags1, e.flags2);
-		}
-	}
-
+		return FileResult::success;
+	} else return FileResult::fail;	
 }

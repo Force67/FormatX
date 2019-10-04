@@ -14,6 +14,7 @@ enum class FileResult
 	badmagic,
 	badversion,
 	badplatform,
+	fail,
 };
 
 class IFileFormat

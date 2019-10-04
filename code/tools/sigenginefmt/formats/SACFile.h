@@ -3,6 +3,7 @@
 // Copyright (C) Greavesy 2019
 
 #include <utl/File.h>
+#include <fileformat.h>
 
 struct SACHeader
 {
@@ -36,9 +37,9 @@ struct SACEntry
 
 static_assert(sizeof(SACEntry) == 56, "Bad Entry size");
 
-class SACFile
+class SACFile : public IFileFormat
 {
-	utl::File& file;
+	std::string name;
 	SACHeader header{};
 	std::vector<SACEntry> filelist{};
 
@@ -46,12 +47,12 @@ class SACFile
 	static constexpr uint32_t sigMagic = 0x67695321;
 	static constexpr uint32_t sacMagic = 0xF28E6F5E;
 
-	std::string getEntryName(SACEntry entry);
+	std::string getEntryName(utl::File& file, SACEntry& entry);
 
 public:
 
-	SACFile(utl::File&);
-	bool Validate();
-	void ExportFiles();
-	void DebugPrintEntries();
+	void SetName(std::string& name);
+	FileResult Deserialize(utl::File&) override;
+	FileResult Serialize(utl::File&) override;
+	FileResult ExtractAll(utl::File&) override;
 };
