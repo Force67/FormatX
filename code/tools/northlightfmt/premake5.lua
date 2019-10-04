@@ -13,13 +13,15 @@ project "NorthlightFMT"
 	
 	links
 	{
-		"shared"
+		"shared",
+		"pugixml"
 	}
 
     includedirs
     {
         ".",
-		"../../shared"
+		"../../shared",
+		"../../ext/pugixml"
     }
 
     files

@@ -3,6 +3,9 @@
 // Copyright (C) Force67 2019
 
 #include <utl/File.h>
+#include <fileformat.h>
+
+static constexpr uint32_t rmdpMagic = 0x44424553; // SEBD
 
 struct RmdpHeader
 {
@@ -14,15 +17,24 @@ struct RmdpHeader
 	uint32_t unk5;
 };
 
-class RmdpFile
+class RmdpArc : public IFileFormat
 {
-	utl::File& file;
-	RmdpHeader header{};
-	
-	static constexpr uint32_t rmdpMagic = 0x44424553; // SEBD
+	RmdpHeader hdr{};
+
+	// custom
+	struct ArcEntry
+	{
+		std::string name;
+		uint32_t offset;
+		uint32_t hash;
+		uint64_t size;
+	};
+	std::vector<ArcEntry> entries;
 
 public:
 
-	RmdpFile(utl::File&);
-	bool ExtractFile();
+	FileResult Deserialize(utl::File&) override;
+
+	// todo: find better way
+	bool ParseDescriptor(const std::string&);
 };
