@@ -17,24 +17,33 @@ struct RmdpHeader
 	uint32_t unk5;
 };
 
-class RmdpArc : public IFileFormat
+namespace pugi {
+	class xml_node;
+}
+
+class RmdpArc final : public IFileFormat
 {
 	RmdpHeader hdr{};
 
+	const std::string &path;
+	std::string extractBase;
+
 	// custom
-	struct ArcEntry
+	struct XmlEntry
 	{
-		std::string name;
+		std::string pathNameFull;
 		uint32_t offset;
-		uint32_t hash;
 		uint64_t size;
 	};
-	std::vector<ArcEntry> entries;
+	std::vector<XmlEntry> entries;
+
+	void TraverseDirectory(pugi::xml_node&);
+	bool ParseDescriptor(const std::string&);
 
 public:
 
-	FileResult Deserialize(utl::File&) override;
+	RmdpArc(const std::string&);
 
-	// todo: find better way
-	bool ParseDescriptor(const std::string&);
+	FileResult Deserialize(utl::File&) override;
+	FileResult ExtractAll(utl::File&) override;
 };

@@ -20,22 +20,18 @@ int main(int argc, char** argv)
 	if (std::strstr(argv[1], ".rmdp") && file.GetSize() > sizeof(RmdpHeader)) {
 		std::string arcdir(argv[1]);
 
-		RmdpArc arc;
-		auto arcroot = arcdir.substr(0, arcdir.length() - 4);
-		{
-			auto xmlDesc = arcroot + "xml";
-			if (std::filesystem::exists(xmlDesc)) {
-				arc.ParseDescriptor(xmlDesc);
-			}
-		}
-
+		RmdpArc arc(arcdir);
 		auto res = arc.Deserialize(file);
 		if (res != FileResult::success) {
 			std::puts("unable to deserialize file");
 			return -2;
 		}
+		else {
+			arc.ExtractAll(file);
+		}
 	}
 
+	std::puts("[+] Done. Press any key to exit");
 	getchar();
 	return 0;
 }
