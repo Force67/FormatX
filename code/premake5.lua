@@ -66,6 +66,7 @@ workspace "FormatX"
 	
 	group "external"
 	include "ext/zlib"
+	include "ext/pugixml"
 	
 -- Cleanup
 if _ACTION == "clean" then
