@@ -59,7 +59,8 @@ workspace "FormatX"
 	include "tools/crystalfmt"
 	include "tools/northlightfmt"
 	include "tools/tboifmt"
-	
+	include "tools/mafia3"
+
 	group "util"
 	include "./shared"
 	
