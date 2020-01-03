@@ -4,19 +4,25 @@
 
 #include <cstdint>
 
-#define EXP extern "C" __declspec(dllexport)
+#define EXPORT extern "C" __declspec(dllexport)
 
-enum class PluginVersion : uint8_t
+using u32 = uint32_t;
+
+enum class PluginVersion : u32
 {
 	V_1_0,
 };
 
-#pragma pack(push, 1)
-struct Plugin
+namespace utl {
+	class File;
+}
+
+struct pluginDesc
 {
 	PluginVersion version;
 	const char* name;
-	bool (*init)(const char* file);
+	const char* prettyName;
+	u32(*accept)(utl::File&); // <return your custom file index
+	bool (*init)(utl::File&, u32 index);
 	void (*shutdown)(); // <optional
 };
-#pragma pack(pop)

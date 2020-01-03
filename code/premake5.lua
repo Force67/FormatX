@@ -6,6 +6,7 @@ workspace "FormatX"
 
 	location "../build"
 	os.mkdir"../build/symbols"
+	targetdir '../bin/%{cfg.buildcfg}'
 	
 	platforms { "x64" }
     targetprefix ""
@@ -16,7 +17,6 @@ workspace "FormatX"
     -- Enable position-independent-code generation
     pic "On"
     startproject "host"
-	targetdir '../bin/%{cfg.buildcfg}'
 
 	libdirs
 	{
@@ -53,21 +53,19 @@ workspace "FormatX"
             "_SCL_SECURE_NO_WARNINGS",
             "_SCL_SECURE_NO_DEPRECATE"
         }
+		
+	group "plugin"
+	include "plugins/plugins.lua"
+	
+	group "app"
+	include "./app"
 
-    group "tools"
-	--include "tools/_template"
-	include "tools/crystalfmt"
-	include "tools/northlightfmt"
-	include "tools/tboifmt"
-	include "tools/mafia3"
-
-	group "util"
+	group "sharedstuff"
 	include "./shared"
 	
-	group "external"
-	include "ext/zlib"
-	include "ext/pugixml"
-	
+	group "vendor"
+	include "./vendor/3rdparty.lua"
+
 -- Cleanup
 if _ACTION == "clean" then
     os.rmdir("../bin");

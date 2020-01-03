@@ -1,27 +1,26 @@
 
-project "TboiFmt"
+project "app"
     language "C++"
     kind "ConsoleApp"
 	flags "NoManifest"
+    targetname "formatx"
 
     vpaths
     {
-		-- shorten virtual include paths
-        ["Code/*"] = { "**.cpp", "**.hpp", "**.h" },
+        ["*"] = { "**.hpp", "**.h" },
+        ["*"] = "**.cpp",
         ["*"] = "premake5.lua"
     }
 	
 	links
 	{
-		"shared",
-		"zlib"
+		"shared"
 	}
 
     includedirs
     {
         ".",
-		"../../shared",
-		"../../ext/zlib"
+		"../shared"
     }
 
     files
