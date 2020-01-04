@@ -10,12 +10,14 @@ namespace Ui {
 	class main_window;
 }
 
+class fmtApp;
+
 class mainWindow : public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	mainWindow();
+	mainWindow(fmtApp&);
 	~mainWindow();
 
 	void init();
@@ -23,9 +25,8 @@ private:
 	void createConnects();
 
 	/*callbacks*/
-	void onBootSelection();
-	void onEnginePause();
-	void onEngineStop();
+	void onOpenFile();
 
+	fmtApp& app;
 	Ui::main_window* ui;
 };

@@ -8,6 +8,7 @@
 #include <QDirIterator>
 #include <QMessageBox>
 #include <utl/path.h>
+#include <utl/File.h>
 
 #include "app.h"
 
@@ -17,7 +18,7 @@ fmtApp::fmtApp(int& argc, char** argv) :
 	setApplicationName("FormatX");
 	setApplicationVersion("1.0");
 
-	window = std::make_unique<mainWindow>();
+	window = std::make_unique<mainWindow>(*this);
 }
 
 void fmtApp::createWindow()
@@ -26,38 +27,23 @@ void fmtApp::createWindow()
 	window->show();
 }
 
-/*
-#if 0
-	utl::File file(argv[1]);
+void fmtApp::loadFile(const char* name)
+{
+	/*TODO: run concurrently*/
 
+	utl::File file(name);
 	fileDesc desc{};
 
-	for (auto& p : fs::directory_iterator(utl::make_abs_path(L"plugins"))) {
-		if (p.is_regular_file() && p.path().extension() == L".dll") {
-			auto *hlib = LoadLibraryW(p.path().c_str());
-			if (hlib) {
-				auto* loader = reinterpret_cast<pluginLoader*>(GetProcAddress(hlib, "PLUGIN"));
-				if (loader) {
-					std::printf("registered %s\n", loader->prettyName);
-					handles.push_back(hlib);
-
-					/* don't unload it here yet */
-/*file.Seek(0, utl::seekMode::seek_set);
-if (!loader->accept(file, desc))
-continue;
-else {
-	file.Seek(0, utl::seekMode::seek_set);
-	std::printf("loading %s\n", desc.name);
-	loader->init(file, desc);
-}
-				}
-				else
-				FreeLibrary(hlib);
-			}
+	for (auto* it : plugins) {
+		file.Seek(0, utl::seekMode::seek_set);
+		if (!it->accept(file, desc))
+			continue;
+		else {
+			file.Seek(0, utl::seekMode::seek_set);
+			it->init(file, desc);
 		}
 	}
-#endif
-*/
+}
 
 bool fmtApp::loadPlugins()
 {

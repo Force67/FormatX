@@ -49,8 +49,8 @@ namespace
 	{
 		switch (in.type) {
 		case TIGER_TR9: {
-
-			break;
+			__debugbreak();
+			return true;
 		}
 		}
 

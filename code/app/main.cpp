@@ -26,6 +26,11 @@ int main(int argc, char** argv)
 	parser.addPositionalArgument("File", "Path for directly loading a file");
 	parser.addPositionalArgument("[Args...]", "Optional args for the executable");
 
+	//TODO: parse positional arguments
+	QScopedPointer<fmtApp> appInstance(new fmtApp(argc, argv));
+	if (!appInstance->loadPlugins())
+		return 0;
+
 #ifdef _WIN32
 	// fix for timer resolution
 	{
@@ -41,11 +46,6 @@ int main(int argc, char** argv)
 			NtSetTimerResolution_f(max_res, TRUE, &new_res);
 	}
 #endif
-
-	//TODO: parse positional arguments
-	QScopedPointer<fmtApp> appInstance(new fmtApp(argc, argv));
-	if (!appInstance->loadPlugins())
-		return 0;
 
 	appInstance->createWindow();
 

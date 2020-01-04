@@ -11,11 +11,13 @@
 #include <QMimeData>
 #include <QScreen>
 
+#include "app.h"
 #include "main_window.h"
 #include "qtgen/ui_main_window.h"
 
 
-mainWindow::mainWindow() :
+mainWindow::mainWindow(fmtApp &app) :
+	app(app),
 	QMainWindow(nullptr),
 	ui(new Ui::main_window())
 {}
@@ -34,36 +36,22 @@ void mainWindow::init()
 	show();
 }
 
-void mainWindow::onBootSelection()
+void mainWindow::onOpenFile()
 {
-	// TODO: pause system
-	QString filePath = QFileDialog::getOpenFileName(this, tr("Select (S)ELF to boot"), "", tr(
-		"(S)ELF files (*BOOT.BIN *.elf *.self);;"
-		"ELF files (BOOT.BIN *.elf);;"
-		"SELF files (EBOOT.BIN *.self);;"
-		"BOOT files (*BOOT.BIN);"
-		"BIN files (*.bin);;",
-		Q_NULLPTR, QFileDialog::DontResolveSymlinks));
+	QString filePath = QFileDialog::getOpenFileName(this, tr("Select file to load"), "", tr(
+		"*"), Q_NULLPTR, QFileDialog::DontResolveSymlinks);
 
-	if (filePath == nullptr) {
-		// resume system
+	if (filePath != nullptr) {
+		auto qs = QFileInfo(filePath).canonicalFilePath();
+		auto* raw = qs.toUtf8().constData();
+		app.loadFile(raw);
 	}
-
-	auto qs = QFileInfo(filePath).canonicalFilePath();
-	auto* strData = qs.toUtf8().constData();
-}
-
-void mainWindow::onEnginePause()
-{
-
-}
-
-void mainWindow::onEngineStop()
-{
 }
 
 void mainWindow::createConnects()
 {
+	connect(ui->openFileAct, &QAction::triggered, this, &mainWindow::onOpenFile);
+
 	//connect(ui->bootAct, &QAction::triggered, this, &mainWindow::onBootSelection);
 	//connect(ui->enginePauseAct, &QAction::triggered, this, &mainWindow::onEnginePause);
 	//connect(ui->engineStopAct, &QAction::triggered, this, &mainWindow::onEnginePause);
