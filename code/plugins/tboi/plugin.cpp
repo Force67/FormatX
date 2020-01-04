@@ -6,40 +6,43 @@
 
 #include "ArcFile.h"
 
-namespace plugin 
+namespace 
 {
-	static u32 accept(utl::File& file)
+	enum fileType
+	{
+		ARC,
+	};
+
+	static bool accept(utl::File& file, fileDesc &out)
 	{
 		if (file.GetSize() > sizeof(ArcHeader)) {
 			char magicName[7];
-			if (std::strncmp(magicName, "ARCH000", 7) != 0)
-				return 1;
+			file.Read(magicName);
+			if (std::strncmp(magicName, "ARCH000", 7) != 0) {
+				out = { ARC, "The Binding of Isaac Rebirth Archive" };
+				return true;
+			}
 		}
 
-		return -1;
+		return false;
 	}
 
-	static bool init(utl::File& file, u32 type)
+	static bool init(utl::File& file, const fileDesc &in)
 	{
-		if (type == 1) {
+		if (in.type == ARC) {
 			ArcFile arc;
 			arc.Deserialize(file);
 		}
 
 		return true;
 	}
-
-	static void shutdown()
-	{
-
-	}
 }
 
-EXPORT pluginDesc PLUGIN = {
+EXPORT pluginLoader PLUGIN = {
 	PluginVersion::V_1_0,
 	"tboiplugin",
 	"The Binding of Isaac Plugin",
-	plugin::accept,
-	plugin::init,
-	plugin::shutdown,
+	::accept,
+	::init,
+	nullptr,
 };

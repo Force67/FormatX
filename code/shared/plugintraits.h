@@ -8,7 +8,7 @@
 
 using u32 = uint32_t;
 
-enum class PluginVersion : u32
+enum class PluginVersion
 {
 	V_1_0,
 };
@@ -17,12 +17,19 @@ namespace utl {
 	class File;
 }
 
-struct pluginDesc
+/*desc may be expanded in future*/
+struct fileDesc
+{
+	int type; /*types are local to your plugin*/
+	const char* name; 
+};
+
+struct pluginLoader
 {
 	PluginVersion version;
 	const char* name;
 	const char* prettyName;
-	u32(*accept)(utl::File&); // <return your custom file index
-	bool (*init)(utl::File&, u32 index);
-	void (*shutdown)(); // <optional
+	bool(*accept)(utl::File&, fileDesc& out);
+	bool(*init)(utl::File&, const fileDesc& in);
+	void(*shutdown)(); // <optional
 };

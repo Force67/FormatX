@@ -4,48 +4,45 @@
 #include <plugintraits.h>
 #include "RmdpFIle.h"
 
-namespace plugin 
+namespace 
 {
-	static u32 accept(utl::File& file)
+	enum fileType
+	{
+		ARC,
+	};
+
+	static bool accept(utl::File& file, fileDesc &out)
 	{
 		if (file.GetSize() > sizeof(RmdpHeader)) {
 			uint32_t magic = 0;
 			file.Read(magic);
 
 			/*todo: verify file versioN!!!*/
-			if (magic == rmdpMagic)
-				return 1;
+			if (magic == rmdpMagic) {
+				out = { ARC, "Control Archive" };
+				return true;
+			}
 		}
 
-		return -1;
+		return false;
 	}
 
-	static bool init(utl::File& file, u32 type)
+	static bool init(utl::File& file, const fileDesc &in)
 	{
-		if (type == 1) {
+		if (in.type == ARC) {
 			RmdpArc arc("");
 			arc.Deserialize(file);
 		}
 
 		return true;
 	}
-
-	static bool init(const char* name)
-	{
-		return true;
-	}
-
-	static void shutdown()
-	{
-
-	}
 }
 
-EXPORT pluginDesc PLUGIN = {
+EXPORT pluginLoader PLUGIN = {
 	PluginVersion::V_1_0,
 	"controlPlugin",
 	"Control Plugin",
-	plugin::accept,
-	plugin::init,
-	plugin::shutdown,
+	::accept,
+	::init,
+	nullptr,
 };

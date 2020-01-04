@@ -1,47 +1,74 @@
 
-// Copyright (C) 2019 Force67
+// Copyright (C) 2019-2020 Force67
 
 #include <plugintraits.h>
+#include <utl/File.h>
 
-#include "TigerArc.h"
-
-namespace plugin 
+namespace 
 {
-	static u32 accept(utl::File& file)
+	constexpr u32 tigerMagic = 0x53464154;
+
+	enum fileType
 	{
-		if (file.GetSize() > sizeof(TigerHeader)) {
-			uint32_t magic = 0;
+		TIGER_TR9,
+		TIGER_TR10,
+		TIGER_TR11,
+	};
+
+	bool accept(utl::File& file, fileDesc &out)
+	{
+		if (file.GetSize() > 52) {
+			u32 magic = 0;
+			u32 version = 0;
 
 			file.Read(magic);
-			if (magic == tigerMagic)
-				return 1;
+			if (magic == tigerMagic) {
+				file.Read(version);
+
+				switch (version) {
+				case 3:
+					out = { TIGER_TR9, "Tomb Raider 2013 Archive" };
+					break;
+				case 4:
+					out = { TIGER_TR10, "Rise of the Tomb Raider Archive" };
+					break;
+				case 5:
+					out = { TIGER_TR11, "Shadow of the Tomb Raider Archive" };
+					break;
+				default:
+					out = {};
+					return false;
+				}
+			}
 		}
 
-		return -1;
+		return true;
 	}
 
-	static bool init(utl::File& file, u32 type)
+	bool init(utl::File& file, const fileDesc &in)
 	{
-		if (type == 1) {
+		switch (in.type) {
+		case TIGER_TR9: {
+
+			break;
+		}
+		}
+
+		/*if (type == 1) {
 			auto arcReader = CreateTigerFMT(file);
 			arcReader->ExtractAll(file);
 			return true;
-		}
+		}*/
 
 		return false;
 	}
-
-	static void shutdown()
-	{
-
-	}
 }
 
-EXPORT pluginDesc PLUGIN = {
+EXPORT pluginLoader PLUGIN = {
 	PluginVersion::V_1_0,
 	"trplugin",
 	"Tomb Raider Plugin",
-	plugin::accept,
-	plugin::init,
-	plugin::shutdown,
+	::accept,
+	::init,
+	nullptr,
 };

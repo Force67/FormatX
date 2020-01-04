@@ -1,62 +1,57 @@
 
 // Copyright (C) 2019-2020 Force67
 
-#include <cstdint>
-#include <cstdio>
-#include <filesystem>
-
-#include <utl/path.h>
-#include <utl/File.h>
-
 #ifdef _WIN32
 #include <Windows.h>
 #endif
 
-#include <plugintraits.h>
+#include <QApplication>
+#include <QCommandLineParser>
+#include <QFileInfo>
+#include <QTimer>
+#include <QObject>
+#include <QMessageBox>
+#include <QTextDocument>
+#include <QStyleFactory>
 
-namespace fs = std::filesystem;
+#include "app.h"
 
 int main(int argc, char** argv)
 {
-	if (argc < 2) {
-		std::puts("Usage: formatx <filename>");
+	qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
+	QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+	QCommandLineParser parser;
+	parser.setApplicationDescription("Welcome to formatx command line.");
+	parser.addPositionalArgument("File", "Path for directly loading a file");
+	parser.addPositionalArgument("[Args...]", "Optional args for the executable");
+
+#ifdef _WIN32
+	// fix for timer resolution
+	{
+		using NtQueryTimerResolution_t = LONG(WINAPI*)(PULONG, PULONG, PULONG);
+		using NtSetTimerResolution_t = LONG(WINAPI*)(ULONG, BOOLEAN, PULONG);
+
+		auto hNtLib = GetModuleHandleW(L"ntdll.dll");
+		auto NtQueryTimerResolution_f = reinterpret_cast<NtQueryTimerResolution_t>(GetProcAddress(hNtLib, "NtQueryTimerResolution"));
+		auto NtSetTimerResolution_f = reinterpret_cast<NtSetTimerResolution_t>(GetProcAddress(hNtLib, "NtSetTimerResolution"));
+
+		ULONG min_res, max_res, orig_res, new_res;
+		if (NtQueryTimerResolution_f(&min_res, &max_res, &orig_res) == 0)
+			NtSetTimerResolution_f(max_res, TRUE, &new_res);
+	}
+#endif
+
+	//TODO: parse positional arguments
+	QScopedPointer<fmtApp> appInstance(new fmtApp(argc, argv));
+	if (!appInstance->loadPlugins())
 		return 0;
-	}
 
-	if (!fs::exists(argv[1])) {
-		std::puts("file does not exist");
-		return 0;
-	}
+	appInstance->createWindow();
 
-	utl::File file(argv[1]);
+	int res = appInstance->exec();
 
-	std::vector<void*> handles;
+	//TODO: cleanup some stuff?
 
-	for (auto& p : fs::directory_iterator(utl::make_abs_path(L"plugins"))) {
-		if (p.is_regular_file() && p.path().extension() == L".dll") {
-			auto *hlib = LoadLibraryW(p.path().c_str());
-			if (hlib) {
-				auto* info = reinterpret_cast<pluginDesc*>(GetProcAddress(hlib, "PLUGIN"));
-				if (info) {
-					std::printf("registered %s\n", info->prettyName);
-					handles.push_back(hlib);		
-
-					/* don't unload it here yet */
-					file.Seek(0, utl::seekMode::seek_set);
-					u32 ret = info->accept(file);
-					if (ret == -1)
-						continue;
-					else
-						info->init(file, ret);
-				}
-				else
-					FreeLibrary(hlib);
-			}
-		}
-	}
-
-	for (auto h : handles)
-		FreeLibrary(static_cast<HMODULE>(h));
-
-	return 0;
+	return res;
 }

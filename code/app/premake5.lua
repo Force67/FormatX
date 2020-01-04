@@ -1,31 +1,60 @@
 
 project "app"
     language "C++"
-    kind "ConsoleApp"
-	flags "NoManifest"
+    kind "WindowedApp"
     targetname "formatx"
 
-    vpaths
+    filter "system:windows"
+        linkoptions "/ENTRY:mainCRTStartup"
+    filter {}
+
+    links
     {
-        ["*"] = { "**.hpp", "**.h" },
-        ["*"] = "**.cpp",
-        ["*"] = "premake5.lua"
+        "shared"
     }
-	
-	links
-	{
-		"shared"
-	}
 
     includedirs
     {
         ".",
-		"../shared"
+        "../shared"
     }
 
     files
     {
         "premake5.lua",
         "**.h",
-        "**.cpp"
+        "**.cpp",
+        "**.ui"
     }
+    
+     -- enable qt for this project
+    qt.enable()
+    
+    qtmodules {
+        "core",
+        "gui",
+        "widgets",
+        "opengl"
+    }
+
+    filter "system:windows"
+        qtmodules {
+            "winextras",
+            "qml"
+        }
+    filter {}
+    
+    qtprefix "Qt5"
+    qtgenerateddir "qtgen"
+
+    -- for ci
+    local qtd = os.getenv("Qt5_Dir")
+    if qtd then
+        qtpath(qtd)
+    end
+    
+    -- use debug versions of qt
+    -- libs in debug builds
+    configuration { "Debug" }
+            qtsuffix "d"
+    configuration {}
