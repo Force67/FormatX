@@ -7,6 +7,7 @@
 #define EXPORT extern "C" __declspec(dllexport)
 
 using u32 = uint32_t;
+using u64 = uint64_t;
 
 enum class PluginVersion
 {
@@ -16,6 +17,8 @@ enum class PluginVersion
 namespace utl {
 	class File;
 }
+
+#pragma pack(push, 1)
 
 /*desc may be expanded in future*/
 struct fileDesc
@@ -33,3 +36,5 @@ struct pluginLoader
 	bool(*init)(utl::File&, const fileDesc& in);
 	void(*shutdown)(); // <optional
 };
+
+#pragma pack (pop)

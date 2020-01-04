@@ -28,13 +28,13 @@ namespace
 				switch (version) {
 				case 3:
 					out = { TIGER_TR9, "Tomb Raider 2013 Archive" };
-					break;
+					return true;
 				case 4:
 					out = { TIGER_TR10, "Rise of the Tomb Raider Archive" };
-					break;
+					return true;
 				case 5:
 					out = { TIGER_TR11, "Shadow of the Tomb Raider Archive" };
-					break;
+					return true;
 				default:
 					out = {};
 					return false;
@@ -42,7 +42,7 @@ namespace
 			}
 		}
 
-		return true;
+		return false;
 	}
 
 	bool init(utl::File& file, const fileDesc &in)

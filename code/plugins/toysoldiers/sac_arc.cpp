@@ -4,7 +4,7 @@
 #include <sstream>
 #include <zlib.h>
 
-#include "SACFile.h"
+#include "sac_arc.h"
 
 namespace fs = std::filesystem;
 
@@ -26,13 +26,6 @@ bool SACFile::Validate()
 {
 	if (file.IsOpen()) {
 		file.Read(header);
-
-		if (header.sacMagic0 != sacMagic || 
-			header.sigMagic0 != sigMagic ||
-			header.sacMagic1 != sacMagic)
-			return false;
-		
-		std::printf("[+] Opening Signal Archive with %d entries\n", header.numEntries);
 		file.Seek(((header.dictionaryOffset) & 0x7FFFFFFF) + 4, utl::seekMode::seek_set);
 		// read in all entries
 		filelist.resize(header.numEntries);

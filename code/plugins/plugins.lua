@@ -2,19 +2,19 @@
 project "plugin-tombraider"
     language "C++"
     kind "SharedLib"
-	targetdir '../../bin/%{cfg.buildcfg}/plugins'
-	
-	links
-	{
-		"shared",
-		"zlib"
-	}
+    targetdir '../../bin/%{cfg.buildcfg}/plugins'
+    
+    links
+    {
+        "shared",
+        "zlib"
+    }
 
     includedirs
     {
         ".",
-		"../shared",
-		"../vendor/zlib"
+        "../shared",
+        "../vendor/zlib"
     }
 
     files
@@ -26,19 +26,19 @@ project "plugin-tombraider"
 project "plugin-tboi"
     language "C++"
     kind "SharedLib"
-	targetdir '../../bin/%{cfg.buildcfg}/plugins'
-	
-	links
-	{
-		"shared",
-		"zlib"
-	}
+    targetdir '../../bin/%{cfg.buildcfg}/plugins'
+    
+    links
+    {
+        "shared",
+        "zlib"
+    }
 
     includedirs
     {
         ".",
-		"../shared",
-		"../ext/zlib"
+        "../shared",
+        "../ext/zlib"
     }
 
     files
@@ -46,29 +46,55 @@ project "plugin-tboi"
         "tboi/**.h",
         "tboi/**.cpp"
     }
-	
+    
 project "plugin-control"
     language "C++"
     kind "SharedLib"
-	targetdir '../../bin/%{cfg.buildcfg}/plugins'
+    targetdir '../../bin/%{cfg.buildcfg}/plugins'
 
-	links
-	{
-		"shared",
-		"zlib",
-		"pugixml"
-	}
+    links
+    {
+        "shared",
+        "zlib",
+        "pugixml"
+    }
 
     includedirs
     {
         ".",
-		"../shared",
-		"../vendor/pugixml/src"
+        "../shared",
+        "../vendor/pugixml/src"
     }
 
     files
     {
         "control/**.h",
         "control/**.cpp"
+    }
+    
+project "plugin-toysoldiers"
+    language "C++"
+    kind "SharedLib"
+    targetdir '../../bin/%{cfg.buildcfg}/plugins'
+
+    links
+    {
+        "shared",
+        "zlib",
+        "pugixml"
+    }
+
+    includedirs
+    {
+        ".",
+        "../shared",
+        "../vendor/zlib",
+        "../vendor/pugixml/src"
+    }
+
+    files
+    {
+        "toysoldiers/**.h",
+        "toysoldiers/**.cpp"
     }
     

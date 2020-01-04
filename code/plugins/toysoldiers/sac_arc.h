@@ -43,8 +43,6 @@ class SACFile
 	std::vector<SACEntry> filelist{};
 
 	static constexpr uint32_t sigVersion = 2;
-	static constexpr uint32_t sigMagic = 0x67695321;
-	static constexpr uint32_t sacMagic = 0xF28E6F5E;
 
 	std::string getEntryName(SACEntry entry);
 
