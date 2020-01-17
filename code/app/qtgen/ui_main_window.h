@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'main_window.ui'
 **
-** Created by: Qt User Interface Compiler version 5.12.0
+** Created by: Qt User Interface Compiler version 5.14.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -131,28 +131,28 @@ public:
 
     void retranslateUi(QMainWindow *main_window)
     {
-        main_window->setWindowTitle(QApplication::translate("main_window", "FormatX", nullptr));
-        openFileAct->setText(QApplication::translate("main_window", "Open File", nullptr));
-        showGeneralOptAct->setText(QApplication::translate("main_window", "General", nullptr));
-#ifndef QT_NO_TOOLTIP
-        showGeneralOptAct->setToolTip(QApplication::translate("main_window", "Configure CPU", nullptr));
-#endif // QT_NO_TOOLTIP
-        exitAct->setText(QApplication::translate("main_window", "Exit", nullptr));
-#ifndef QT_NO_TOOLTIP
-        exitAct->setToolTip(QApplication::translate("main_window", "Exit RPCS3", nullptr));
-#endif // QT_NO_TOOLTIP
-#ifndef QT_NO_STATUSTIP
-        exitAct->setStatusTip(QApplication::translate("main_window", "Exit the application", nullptr));
-#endif // QT_NO_STATUSTIP
-        aboutAppAct->setText(QApplication::translate("main_window", "About FormatX", nullptr));
-        updateAct->setText(QApplication::translate("main_window", "Check for Updates", nullptr));
-        clearRecentAct->setText(QApplication::translate("main_window", "List Clear", nullptr));
-        freezeRecentAct->setText(QApplication::translate("main_window", "List Freeze", nullptr));
-        menuFile->setTitle(QApplication::translate("main_window", "File", nullptr));
-        openRecentFilesMenu->setTitle(QApplication::translate("main_window", "Open Recent Files", nullptr));
-        menuConfiguration->setTitle(QApplication::translate("main_window", "Options", nullptr));
-        menuView->setTitle(QApplication::translate("main_window", "View", nullptr));
-        menuHelp->setTitle(QApplication::translate("main_window", "Help", nullptr));
+        main_window->setWindowTitle(QCoreApplication::translate("main_window", "FormatX", nullptr));
+        openFileAct->setText(QCoreApplication::translate("main_window", "Open File", nullptr));
+        showGeneralOptAct->setText(QCoreApplication::translate("main_window", "General", nullptr));
+#if QT_CONFIG(tooltip)
+        showGeneralOptAct->setToolTip(QCoreApplication::translate("main_window", "Configure CPU", nullptr));
+#endif // QT_CONFIG(tooltip)
+        exitAct->setText(QCoreApplication::translate("main_window", "Exit", nullptr));
+#if QT_CONFIG(tooltip)
+        exitAct->setToolTip(QCoreApplication::translate("main_window", "Exit RPCS3", nullptr));
+#endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(statustip)
+        exitAct->setStatusTip(QCoreApplication::translate("main_window", "Exit the application", nullptr));
+#endif // QT_CONFIG(statustip)
+        aboutAppAct->setText(QCoreApplication::translate("main_window", "About FormatX", nullptr));
+        updateAct->setText(QCoreApplication::translate("main_window", "Check for Updates", nullptr));
+        clearRecentAct->setText(QCoreApplication::translate("main_window", "List Clear", nullptr));
+        freezeRecentAct->setText(QCoreApplication::translate("main_window", "List Freeze", nullptr));
+        menuFile->setTitle(QCoreApplication::translate("main_window", "File", nullptr));
+        openRecentFilesMenu->setTitle(QCoreApplication::translate("main_window", "Open Recent Files", nullptr));
+        menuConfiguration->setTitle(QCoreApplication::translate("main_window", "Options", nullptr));
+        menuView->setTitle(QCoreApplication::translate("main_window", "View", nullptr));
+        menuHelp->setTitle(QCoreApplication::translate("main_window", "Help", nullptr));
     } // retranslateUi
 
 };

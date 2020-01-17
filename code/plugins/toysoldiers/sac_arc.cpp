@@ -1,4 +1,4 @@
-// Copyright (C) Greavesy 2019
+// Copyright (C) 2019-2020 Greavesy
 #include <filesystem>
 #include <iostream>
 #include <sstream>
@@ -62,10 +62,10 @@ FileResult SACFile::Serialize(utl::File& file)
 		this->filelist.push_back(SACEntry());
 	}
 
-	this->header.sacMagic0 = sacMagic;
-	this->header.sigMagic0 = sigMagic;
+	this->header.sacMagic0 = FileIdentifiers::SAC;
+	this->header.sigMagic0 = 0x67695321;
 	this->header.sigVersion = 0x22142;
-	this->header.sacMagic1 = sacMagic;
+	this->header.sacMagic1 = FileIdentifiers::SAC;
 	this->header.dictionaryOffset = sizeof(SACHeader)+4;
 	this->header.numEntries = this->filelist.size();
 

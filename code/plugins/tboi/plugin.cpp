@@ -18,7 +18,7 @@ namespace
 		if (file.GetSize() > sizeof(ArcHeader)) {
 			char magicName[7];
 			file.Read(magicName);
-			if (std::strncmp(magicName, "ARCH000", 7) != 0) {
+			if (std::strncmp(magicName, "ARCH000", 7) == 0) {
 				out = { ARC, "The Binding of Isaac Rebirth Archive" };
 				return true;
 			}

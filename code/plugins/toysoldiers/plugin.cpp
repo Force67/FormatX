@@ -1,30 +1,35 @@
 
-// Copyright (C) 2019-2020 Force67
+// Copyright (C) 2019-2020 Force67, Greavesy
 
 #include <plugintraits.h>
 #include <utl/File.h>
-
+#include "types.h"
 #include "sac_arc.h"
 
 namespace
 {
-	constexpr u64 ksacsigMagic = 0xF28E6F5E67695321;
-
 	enum fileType
 	{
-		ARC,
+		SACB,
 	};
 
 	bool accept(utl::File& file, fileDesc& out)
 	{
 		if (file.GetSize() > sizeof(SACHeader)) {
-			u64 sacsigMagic = 0;
+			u32 fileID;
+			char sigMagic[6];
+			u16 version;
 
 			/*in reality two dwords*/
-			file.Read(sacsigMagic);
-			if (sacsigMagic == ksacsigMagic) {
-				out = { ARC, "Toy Soldiers SAC Archive" };
-				return true;
+			auto pos = file.Tell();
+			file.Read(fileID);
+			file.Read(sigMagic);
+			file.Read(version);
+			if ((std::strncmp(sigMagic, "!SigB!", 6) == 0) && (version == 2)) {
+				if (fileID == FileIdentifiers::SAC) {
+					out = { SACB, "Toy Soldiers SACB Archive" };
+					return true;
+				}
 			}
 		}
 
@@ -33,12 +38,10 @@ namespace
 
 	bool init(utl::File& file, const fileDesc& in)
 	{
-		if (in.type == ARC) {
-			SACFile arc(file);
-			if (arc.Validate()) {
-				arc.ExportFiles();
-				return true;
-			}
+		if (in.type == SACB) {
+			SACFile arc;
+			arc.Deserialize(file);
+			return true;
 		}
 
 		return false;

@@ -1,9 +1,10 @@
 #pragma once
 
-// Copyright (C) Greavesy 2019
+// Copyright (C) 2019-2020 Greavesy
 
 #include <utl/File.h>
 #include <fileformat.h>
+#include "types.h"
 
 struct SACHeader
 {
@@ -21,7 +22,7 @@ struct SACEntry
 {
 	uint32_t nameOffset;
 	uint32_t nameSize;
-	uint32_t unkOffset;
+	FileIdentifiers type;
 	uint32_t isCompressed;
 	uint32_t dataOffset;
 	uint32_t compressedSize;

@@ -30,7 +30,6 @@ void fmtApp::createWindow()
 void fmtApp::loadFile(const char* name)
 {
 	/*TODO: run concurrently*/
-
 	utl::File file(name);
 	fileDesc desc{};
 
@@ -40,7 +39,8 @@ void fmtApp::loadFile(const char* name)
 			continue;
 		else {
 			file.Seek(0, utl::seekMode::seek_set);
-			it->init(file, desc);
+			auto result = it->init(file, desc);
+			printf("breakpoint, result %b", result);
 		}
 	}
 }

@@ -41,9 +41,12 @@ void mainWindow::onOpenFile()
 	QString filePath = QFileDialog::getOpenFileName(this, tr("Select file to load"), "", tr(
 		"*"), Q_NULLPTR, QFileDialog::DontResolveSymlinks);
 
+	//for this, using 'qs.toUtf8().data() didn't work. 
+	//So i changed to get the QByteArray and then get the data. ~Greavesy
 	if (filePath != nullptr) {
 		auto qs = QFileInfo(filePath).canonicalFilePath();
-		auto* raw = qs.toUtf8().constData();
+		auto bytes = qs.toUtf8();
+		auto* raw = bytes.constData();
 		app.loadFile(raw);
 	}
 }
