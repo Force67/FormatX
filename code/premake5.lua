@@ -1,28 +1,33 @@
 
 premake.path = premake.path .. ";build"
+package.path = package.path .. ";../tools/premake/premake-qt/?.lua"
+
+-- qt short alias 
+require('qt')
+qt = premake.extensions.qt
 
 workspace "FormatX"
     configurations { "Debug", "Release" }
 
-	location "../build"
-	os.mkdir"../build/symbols"
-	
-	platforms { "x64" }
+    location "../build"
+    os.mkdir"../build/symbols"
+    targetdir '../bin/%{cfg.buildcfg}'
+    
+    platforms { "x64" }
     targetprefix ""
     buildoptions "/std:c++17"
     symbols "On"
     characterset "Unicode"
-	
+    
     -- Enable position-independent-code generation
     pic "On"
     startproject "host"
-	targetdir '../bin/%{cfg.buildcfg}'
 
-	libdirs
-	{
-		"./shared/Lib",
-	}
-	
+    libdirs
+    {
+        "./shared/Lib",
+    }
+    
     filter "platforms:x64"
          architecture "x86_64"
 
@@ -42,10 +47,10 @@ workspace "FormatX"
     filter "action:vs*"
         defines
         {
-			"NOMINMAX",
-			"WIN32_LEAN_AND_MEAN",
-			"_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
-			"_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING",
+            "NOMINMAX",
+            "WIN32_LEAN_AND_MEAN",
+            "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
+            "_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING",
             "_CRT_SECURE_NO_WARNINGS",
             "_CRT_SECURE_NO_DEPRECATE",
             "_CRT_NONSTDC_NO_WARNINGS",
@@ -53,20 +58,19 @@ workspace "FormatX"
             "_SCL_SECURE_NO_WARNINGS",
             "_SCL_SECURE_NO_DEPRECATE"
         }
+        
+    group "plugin"
+    include "plugins/plugins.lua"
+    
+    group "app"
+    include "./app"
 
-    group "tools"
-	--include "tools/_template"
-	include "tools/crystalfmt"
-    include "tools/northlightfmt"
-    include "tools/sigenginefmt"
-	include "tools/tboifmt"
+    group "sharedstuff"
+    include "./shared"
+    
+    group "vendor"
+    include "./vendor/3rdparty.lua"
 
-	group "util"
-	include "./shared"
-	
-	group "external"
-	include "ext/zlib"
-	
 -- Cleanup
 if _ACTION == "clean" then
     os.rmdir("../bin");

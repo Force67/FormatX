@@ -1,0 +1,6 @@
+[submodule "code/vendor/pugixml"]
+	path = code/vendor/pugixml
+	url = https://github.com/zeux/pugixml
+[submodule "code/vendor/zlib"]
+	path = code/vendor/zlib
+	url = https://github.com/madler/zlib
