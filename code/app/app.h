@@ -22,8 +22,6 @@ public:
 	bool loadPlugins();
 	void createWindow();
 
-	void loadFile(const char* name);
-	
 	pluginList& getPlugins() {
 		return plugins;
 	}

@@ -27,24 +27,6 @@ void fmtApp::createWindow()
 	window->show();
 }
 
-void fmtApp::loadFile(const char* name)
-{
-	/*TODO: run concurrently*/
-
-	utl::File file(name);
-	fileDesc desc{};
-
-	for (auto* it : plugins) {
-		file.Seek(0, utl::seekMode::seek_set);
-		if (!it->accept(file, desc))
-			continue;
-		else {
-			file.Seek(0, utl::seekMode::seek_set);
-			it->init(file, desc);
-		}
-	}
-}
-
 bool fmtApp::loadPlugins()
 {
 	QDirIterator it(QString::fromStdString(utl::make_abs_path("plugins")));

@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 	QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 	QCommandLineParser parser;
-	parser.setApplicationDescription("Welcome to formatx command line.");
+	parser.setApplicationDescription("Welcome to FormatX command line.");
 	parser.addPositionalArgument("File", "Path for directly loading a file");
 	parser.addPositionalArgument("[Args...]", "Optional args for the executable");
 
