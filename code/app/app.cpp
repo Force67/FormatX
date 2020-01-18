@@ -12,6 +12,8 @@
 
 #include "app.h"
 
+#include "rend/rend.h"
+
 fmtApp::fmtApp(int& argc, char** argv) :
 	QApplication(argc, argv)
 {

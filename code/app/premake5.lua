@@ -26,8 +26,23 @@ project "app"
         "**.cpp",
         "**.ui"
     }
+
+    -- fetch vk dir from path
+    local vkd = os.getenv("VULKAN_SDK")
+    if vkd then
+        libdirs(vkd .. "\\Lib")
+        includedirs(vkd .. "\\Include")
+
+        links 
+        {
+            "vulkan-1",
+            "VkLayer_utils"
+        }
+
+        defines "QT_FEATURE_vulkan"
+    end
     
-     -- enable qt for this project
+    -- enable qt for this project
     qt.enable()
     
     qtmodules {
