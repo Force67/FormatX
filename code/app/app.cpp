@@ -12,6 +12,8 @@
 
 #include "app.h"
 
+#include "rend/rend.h"
+
 fmtApp::fmtApp(int& argc, char** argv) :
 	QApplication(argc, argv)
 {
@@ -25,24 +27,6 @@ void fmtApp::createWindow()
 {
 	window->init();
 	window->show();
-}
-
-void fmtApp::loadFile(const char* name)
-{
-	/*TODO: run concurrently*/
-	utl::File file(name);
-	fileDesc desc{};
-
-	for (auto* it : plugins) {
-		file.Seek(0, utl::seekMode::seek_set);
-		if (!it->accept(file, desc))
-			continue;
-		else {
-			file.Seek(0, utl::seekMode::seek_set);
-			auto result = it->init(file, desc);
-			printf("breakpoint, result %b", result);
-		}
-	}
 }
 
 bool fmtApp::loadPlugins()

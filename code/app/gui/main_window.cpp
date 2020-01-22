@@ -9,10 +9,12 @@
 #include <QDockWidget>
 #include <QDesktopWidget>
 #include <QMimeData>
-#include <QScreen>
+#include <QDragMoveEvent>
 
 #include "app.h"
 #include "main_window.h"
+#include "load_file_dialog.h"
+
 #include "qtgen/ui_main_window.h"
 
 
@@ -20,7 +22,10 @@ mainWindow::mainWindow(fmtApp &app) :
 	app(app),
 	QMainWindow(nullptr),
 	ui(new Ui::main_window())
-{}
+{
+	ui->setupUi(this);
+	setAcceptDrops(true);
+}
 
 mainWindow::~mainWindow()
 {
@@ -29,10 +34,7 @@ mainWindow::~mainWindow()
 
 void mainWindow::init()
 {
-	ui->setupUi(this);
-	createConnects();
-
-	setAcceptDrops(true);
+	connect(ui->openFileAct, &QAction::triggered, this, &mainWindow::onOpenFile);
 	show();
 }
 
@@ -45,17 +47,57 @@ void mainWindow::onOpenFile()
 	//So i changed to get the QByteArray and then get the data. ~Greavesy
 	if (filePath != nullptr) {
 		auto qs = QFileInfo(filePath).canonicalFilePath();
-		auto bytes = qs.toUtf8();
-		auto* raw = bytes.constData();
-		app.loadFile(raw);
+
+		loadFileDialog diag(this);
+		if (diag.load(app, qs))
+			diag.exec();
 	}
 }
 
-void mainWindow::createConnects()
+static bool isValidFile(const QMimeData& md)
 {
-	connect(ui->openFileAct, &QAction::triggered, this, &mainWindow::onOpenFile);
+	auto& list = md.urls();
 
-	//connect(ui->bootAct, &QAction::triggered, this, &mainWindow::onBootSelection);
-	//connect(ui->enginePauseAct, &QAction::triggered, this, &mainWindow::onEnginePause);
-	//connect(ui->engineStopAct, &QAction::triggered, this, &mainWindow::onEnginePause);
+	// only allow one file
+	if (list.size() > 1 || !list.size())
+		return false;
+
+	auto& url = list[0];
+	const auto path = url.toLocalFile();
+	const QFileInfo info = path;
+
+	if (info.isDir())
+		return false;
+
+	return true;
+}
+
+void mainWindow::dragEnterEvent(QDragEnterEvent* event)
+{
+	if (isValidFile(*event->mimeData()))
+		event->accept();
+}
+
+void mainWindow::dragMoveEvent(QDragMoveEvent* event)
+{
+	if (isValidFile(*event->mimeData()))
+		event->accept();
+}
+
+void mainWindow::dragLeaveEvent(QDragLeaveEvent* event)
+{
+	event->accept();
+}
+
+void mainWindow::dropEvent(QDropEvent* event)
+{
+	auto& md = *event->mimeData();
+
+	if (isValidFile(md)) {
+		const auto path = md.urls()[0].toLocalFile();
+
+		loadFileDialog diag(this);
+		if (diag.load(app, path))
+			diag.exec();
+	}
 }

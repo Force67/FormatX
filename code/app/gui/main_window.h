@@ -22,10 +22,14 @@ public:
 
 	void init();
 private:
-	void createConnects();
-
 	/*callbacks*/
 	void onOpenFile();
+
+	// drag'n drop
+	void dragEnterEvent(QDragEnterEvent* event) override;
+	void dragMoveEvent(QDragMoveEvent* event) override;
+	void dragLeaveEvent(QDragLeaveEvent* event) override;
+	void dropEvent(QDropEvent* event) override;
 
 	fmtApp& app;
 	Ui::main_window* ui;
