@@ -69,14 +69,13 @@ void vkRend::initResources()
 	const int concurrentFrameCount = be->concurrentFrameCount();
 	const VkPhysicalDeviceLimits* pdevLimits = &be->physicalDeviceProperties()->limits;
 	const VkDeviceSize uniAlign = pdevLimits->minUniformBufferOffsetAlignment;
-	VkBufferCreateInfo bufferInfo;
-	memset(&bufferInfo, 0, sizeof(bufferInfo));
+
+	VkBufferCreateInfo bufferInfo{};
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	bufferInfo.size = sizeof(float) * 15;
-	const VkDeviceSize vertexAllocSize = aligned(sizeof(vertexData), uniAlign);
-	const VkDeviceSize uniformAllocSize = aligned(UNIFORM_DATA_SIZE, uniAlign);
 	bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	bufferInfo.size = sizeof(vertexData) * sizeof(float);
+
 	result = devFuncs->vkCreateBuffer(device, &bufferInfo, nullptr, &m_buf);
 	if (result != VkResult::VK_SUCCESS) {
 		printf("Failed to create Vertex Buffer!\n");
@@ -88,11 +87,11 @@ void vkRend::initResources()
 	VkMemoryRequirements memRequirements;
 	devFuncs->vkGetBufferMemoryRequirements(device, m_buf, &memRequirements);
 
-	VkMemoryAllocateInfo allocation;
-	memset(&allocation, 0, sizeof(allocation));
+	VkMemoryAllocateInfo allocation{};
 	allocation.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocation.allocationSize = memRequirements.size;
 	allocation.memoryTypeIndex = be->hostVisibleMemoryIndex();
+
 	result = devFuncs->vkAllocateMemory(device, &allocation, nullptr, &m_bufMem);
 	if (result != VkResult::VK_SUCCESS) {
 		printf("Failed to allocate memory for Vertex Buffer!\n");
@@ -110,12 +109,16 @@ void vkRend::initResources()
 		printf("Failed to bind buffer!\n");
 	}
 
+	const VkDeviceSize vertexAllocSize = aligned(sizeof(vertexData), uniAlign);
+	const VkDeviceSize uniformAllocSize = aligned(UNIFORM_DATA_SIZE, uniAlign);
+
 	memcpy(data, vertexData, sizeof(vertexData));
 	QMatrix4x4 ident;
 	memset(m_uniformBufInfo, 0, sizeof(m_uniformBufInfo));
 	for (int i = 0; i < be->concurrentFrameCount(); ++i) {
-		const VkDeviceSize offset = vertexAllocSize + i * uniformAllocSize;
-		memcpy(data + offset, ident.constData(), 16 * sizeof(float));
+		//const VkDeviceSize offset = vertexAllocSize + i * uniformAllocSize;
+		const auto offset = i * sizeof(QMatrix4x4);
+		memcpy(data + offset, ident.constData(), sizeof(QMatrix4x4));
 		m_uniformBufInfo[i].buffer = m_buf;
 		m_uniformBufInfo[i].offset = offset;
 		m_uniformBufInfo[i].range = uniformAllocSize;
@@ -476,8 +479,6 @@ bool vkBackend::create()
 	return true;
 }
 
-QVulkanWindowRenderer* vkBackend::createRenderer()
-{
-	auto* r = new vkRend(this);
-	return r;
+QVulkanWindowRenderer* vkBackend::createRenderer() {
+	return new vkRend(this);
 }
