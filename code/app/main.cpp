@@ -15,6 +15,8 @@
 #include <QStyleFactory>
 
 #include "app.h"
+#include "rend/rend.h"
+#include <QVulkanWindow>
 
 int main(int argc, char** argv)
 {
@@ -47,11 +49,11 @@ int main(int argc, char** argv)
 	}
 #endif
 
-	appInstance->createWindow();
 
-	int res = appInstance->exec();
+	appInstance->createWindow();
+	auto interface = createRend(rendBackend::vulkan);
+	//interface.get()->create();
 
 	//TODO: cleanup some stuff?
-
-	return res;
+	return appInstance->exec();
 }

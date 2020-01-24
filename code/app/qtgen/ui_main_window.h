@@ -92,7 +92,7 @@ public:
         main_window->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(main_window);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1058, 18));
+        menuBar->setGeometry(QRect(0, 0, 1058, 22));
         menuBar->setContextMenuPolicy(Qt::PreventContextMenu);
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
@@ -139,7 +139,7 @@ public:
 #endif // QT_CONFIG(tooltip)
         exitAct->setText(QCoreApplication::translate("main_window", "Exit", nullptr));
 #if QT_CONFIG(tooltip)
-        exitAct->setToolTip(QCoreApplication::translate("main_window", "Exit RPCS3", nullptr));
+        exitAct->setToolTip(QCoreApplication::translate("main_window", "Exit FormatX", nullptr));
 #endif // QT_CONFIG(tooltip)
 #if QT_CONFIG(statustip)
         exitAct->setStatusTip(QCoreApplication::translate("main_window", "Exit the application", nullptr));
