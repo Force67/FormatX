@@ -71,9 +71,9 @@ void vkRend::initResources()
 	const VkDeviceSize uniAlign = pdevLimits->minUniformBufferOffsetAlignment;
 
 	VkBufferCreateInfo bufferInfo{};
+	memset(&bufferInfo, 0, sizeof(bufferInfo));
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	bufferInfo.size = sizeof(vertexData) * sizeof(float);
 
 	result = devFuncs->vkCreateBuffer(device, &bufferInfo, nullptr, &m_buf);
@@ -88,6 +88,7 @@ void vkRend::initResources()
 	devFuncs->vkGetBufferMemoryRequirements(device, m_buf, &memRequirements);
 
 	VkMemoryAllocateInfo allocation{};
+	memset(&allocation, 0, sizeof(allocation));
 	allocation.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocation.allocationSize = memRequirements.size;
 	allocation.memoryTypeIndex = be->hostVisibleMemoryIndex();
@@ -116,9 +117,9 @@ void vkRend::initResources()
 	QMatrix4x4 ident;
 	memset(m_uniformBufInfo, 0, sizeof(m_uniformBufInfo));
 	for (int i = 0; i < be->concurrentFrameCount(); ++i) {
-		//const VkDeviceSize offset = vertexAllocSize + i * uniformAllocSize;
-		const auto offset = i * sizeof(QMatrix4x4);
-		memcpy(data + offset, ident.constData(), sizeof(QMatrix4x4));
+		const VkDeviceSize offset = vertexAllocSize + i * uniformAllocSize;
+		//const auto offset = i * sizeof(QMatrix4x4);
+		memcpy(data + offset, ident.constData(), 16 * sizeof(float));
 		m_uniformBufInfo[i].buffer = m_buf;
 		m_uniformBufInfo[i].offset = offset;
 		m_uniformBufInfo[i].range = uniformAllocSize;
@@ -134,16 +135,20 @@ void vkRend::initResources()
 	bindingDescription.stride = 5 * sizeof(float);
 	bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-	VkVertexInputAttributeDescription attributeDescription[2];
-	memset(&attributeDescription, 0, sizeof(attributeDescription));
-	attributeDescription[0].location = 0;
-	attributeDescription[0].binding = 0;
-	attributeDescription[0].format = VK_FORMAT_R32G32_SFLOAT;
-	attributeDescription[0].offset = 0;
-	attributeDescription[1].location = 1;
-	attributeDescription[1].binding = 0;
-	attributeDescription[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-	attributeDescription[1].offset = 2 * sizeof(float);
+	VkVertexInputAttributeDescription attributeDescription[] = {
+			{ // position
+				0, // location
+				0, // binding
+				VK_FORMAT_R32G32_SFLOAT,
+				0
+			},
+			{ // color
+				1,
+				0,
+				VK_FORMAT_R32G32B32_SFLOAT,
+				2 * sizeof(float)
+			}
+	};
 
 
 	//declare number of attributes and layout for the vertex data for the pipeline.
@@ -156,14 +161,6 @@ void vkRend::initResources()
 	inputInfo.pVertexBindingDescriptions = &bindingDescription;
 	inputInfo.vertexAttributeDescriptionCount = 2;
 	inputInfo.pVertexAttributeDescriptions = attributeDescription;
-
-	// Pipeline cache
-	VkPipelineCacheCreateInfo pipelineCacheInfo;
-	memset(&pipelineCacheInfo, 0, sizeof(pipelineCacheInfo));
-	pipelineCacheInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-	result = devFuncs->vkCreatePipelineCache(device, &pipelineCacheInfo, nullptr, &m_pipelineCache);
-	if (result != VK_SUCCESS)
-		printf("Failed to create pipeline cache!");
 
 	// Set up descriptor set and its layout.
 	VkDescriptorPoolSize descPoolSizes = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uint32_t(be->concurrentFrameCount()) };
@@ -217,6 +214,14 @@ void vkRend::initResources()
 		devFuncs->vkUpdateDescriptorSets(device, 1, &descWrite, 0, nullptr);
 	}
 
+	// Pipeline cache
+	VkPipelineCacheCreateInfo pipelineCacheInfo;
+	memset(&pipelineCacheInfo, 0, sizeof(pipelineCacheInfo));
+	pipelineCacheInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+	result = devFuncs->vkCreatePipelineCache(device, &pipelineCacheInfo, nullptr, &m_pipelineCache);
+	if (result != VK_SUCCESS)
+		printf("Failed to create pipeline cache!");
+
 	//Pipeline layout
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo;
 	memset(&pipelineLayoutInfo, 0, sizeof(pipelineLayoutInfo));
@@ -228,8 +233,8 @@ void vkRend::initResources()
 		printf("Failed to create pipeline layout!");
 
 	//import shaders
-	VkShaderModule vertModule = createShaderModule(QStringLiteral(":/color_vert.spv"));
-	VkShaderModule fragModule = createShaderModule(QStringLiteral(":/color_frag.spv"));
+	VkShaderModule vertModule = createShaderModule(QStringLiteral("color_vert.spv"));
+	VkShaderModule fragModule = createShaderModule(QStringLiteral("color_frag.spv"));
 
 	//begin the creation of the graphics pipeline:
 	//insert these shaders into the render pipeline.
@@ -240,16 +245,35 @@ void vkRend::initResources()
 	pipeInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipeInfo.stageCount = 2;
 
-	VkPipelineShaderStageCreateInfo stages[2];
-	stages[0].sType = stages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	stages[0].pName = stages[1].pName = "main";
-	stages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-	stages[0].module = vertModule;
-	stages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	stages[1].module = fragModule;
+	VkPipelineShaderStageCreateInfo stages[2] = {
+		{
+			VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+			nullptr,
+			0,
+			VK_SHADER_STAGE_VERTEX_BIT,
+			vertModule,
+			"main",
+			nullptr
+		},
+		{
+			VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+			nullptr,
+			0,
+			VK_SHADER_STAGE_FRAGMENT_BIT,
+			fragModule,
+			"main",
+			nullptr
+		}
+	};
 
 	pipeInfo.pStages = stages;
 	pipeInfo.pVertexInputState = &inputInfo;
+
+	VkPipelineInputAssemblyStateCreateInfo assemblyState;
+	memset(&assemblyState, 0, sizeof(assemblyState));
+	assemblyState.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	assemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	pipeInfo.pInputAssemblyState = &assemblyState;
 
 	//create viewport data for the pipeline. 
 	//This can be set later, allowing us to resize the window.
@@ -289,6 +313,7 @@ void vkRend::initResources()
 	VkPipelineColorBlendStateCreateInfo cb;
 	memset(&cb, 0, sizeof(cb));
 	cb.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+
 	VkPipelineColorBlendAttachmentState att;
 	memset(&att, 0, sizeof(att));
 	att.colorWriteMask = 0xF;
@@ -337,9 +362,9 @@ void vkRend::startNextFrame()
 {
 	VkClearColorValue clearColor = { {0.0f, 0.0f, 0.0f, 1.0f} };
 	VkClearDepthStencilValue clearDepthStencil = { 1.0f, 0.0f };
-	VkClearValue clearValues[2];
+	VkClearValue clearValues[3];
 	memset(clearValues, 0, sizeof(clearValues));
-	clearValues[0].color = clearColor;
+	clearValues[0].color = clearValues[2].color = clearColor;
 	clearValues[1].depthStencil = clearDepthStencil;
 
 	VkRenderPassBeginInfo renderPassInfo;
@@ -358,7 +383,8 @@ void vkRend::startNextFrame()
 	//we now need to render the vertex buffer we created earlier. 
 	devFuncs->vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 	devFuncs->vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &m_descSet[be->currentFrame()], 0, nullptr);
-	devFuncs->vkCmdBindVertexBuffers(cmd, 0, 1, &m_buf, 0);
+	VkDeviceSize vbOffset = 0;
+	devFuncs->vkCmdBindVertexBuffers(cmd, 0, 1, &m_buf, &vbOffset);
 
 	//before fully drawing, we need to update viewports and scissors.
 	//Maybe we can do this at the start rather than in the update. 
@@ -430,6 +456,10 @@ void vkRend::releaseResources()
 VkShaderModule vkRend::createShaderModule(const QString& name)
 {
 	//open the file and read all the data.
+	if (!QFile::exists(name)) {
+		printf("File %s does not exist!", name.data());
+		return VK_NULL_HANDLE;
+	}
 	QFile file(name);
 	if (!file.open(QIODevice::ReadOnly)) {
 		printf("Failed to open shader file!");
