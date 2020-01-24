@@ -10,6 +10,7 @@
 #include <plugintraits.h>
 
 #include "gui/main_window.h"
+#include "rend/rend.h"
 
 class fmtApp : public QApplication
 {
@@ -29,4 +30,5 @@ public:
 private:
 	pluginList plugins;
 	std::unique_ptr<mainWindow> window;
+	std::unique_ptr<rendInterface> rendI;
 };

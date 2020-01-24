@@ -20,7 +20,7 @@ public:
 	mainWindow(fmtApp&);
 	~mainWindow();
 
-	void init();
+	void init(QWindow *w = nullptr);
 private:
 	/*callbacks*/
 	void onOpenFile();
@@ -30,7 +30,15 @@ private:
 	void dragMoveEvent(QDragMoveEvent* event) override;
 	void dragLeaveEvent(QDragLeaveEvent* event) override;
 	void dropEvent(QDropEvent* event) override;
+	void resizeEvent(QResizeEvent* event) override;
+	void keyPressEvent(QKeyEvent* event) override;
+
+	void updateChild();
 
 	fmtApp& app;
+	QWidget* rendChild = nullptr;
 	Ui::main_window* ui;
+
+	bool fullmodeEditor = false;
+	QRect backupGeom{};
 };

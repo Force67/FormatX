@@ -24,7 +24,8 @@ project "app"
         "premake5.lua",
         "**.h",
         "**.cpp",
-        "**.ui"
+        "**.ui",
+		"**.inl"
     }
 
     -- fetch vk dir from path
