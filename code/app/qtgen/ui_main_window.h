@@ -31,6 +31,8 @@ public:
     QAction *updateAct;
     QAction *clearRecentAct;
     QAction *freezeRecentAct;
+    QAction *aboutQtAct;
+    QAction *aboutFBXAct;
     QWidget *centralWidget;
     QWidget *sizeSliderContainer;
     QHBoxLayout *horizontalLayout;
@@ -71,6 +73,10 @@ public:
         freezeRecentAct = new QAction(main_window);
         freezeRecentAct->setObjectName(QString::fromUtf8("freezeRecentAct"));
         freezeRecentAct->setCheckable(true);
+        aboutQtAct = new QAction(main_window);
+        aboutQtAct->setObjectName(QString::fromUtf8("aboutQtAct"));
+        aboutFBXAct = new QAction(main_window);
+        aboutFBXAct->setObjectName(QString::fromUtf8("aboutFBXAct"));
         centralWidget = new QWidget(main_window);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         sizePolicy.setHeightForWidth(centralWidget->sizePolicy().hasHeightForWidth());
@@ -92,7 +98,7 @@ public:
         main_window->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(main_window);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1058, 22));
+        menuBar->setGeometry(QRect(0, 0, 1058, 30));
         menuBar->setContextMenuPolicy(Qt::PreventContextMenu);
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
@@ -123,6 +129,8 @@ public:
         menuHelp->addAction(updateAct);
         menuHelp->addSeparator();
         menuHelp->addAction(aboutAppAct);
+        menuHelp->addAction(aboutFBXAct);
+        menuHelp->addAction(aboutQtAct);
 
         retranslateUi(main_window);
 
@@ -148,6 +156,8 @@ public:
         updateAct->setText(QCoreApplication::translate("main_window", "Check for Updates", nullptr));
         clearRecentAct->setText(QCoreApplication::translate("main_window", "List Clear", nullptr));
         freezeRecentAct->setText(QCoreApplication::translate("main_window", "List Freeze", nullptr));
+        aboutQtAct->setText(QCoreApplication::translate("main_window", "About Qt", nullptr));
+        aboutFBXAct->setText(QCoreApplication::translate("main_window", "About Autodesk\302\256 FBX\302\256", nullptr));
         menuFile->setTitle(QCoreApplication::translate("main_window", "File", nullptr));
         openRecentFilesMenu->setTitle(QCoreApplication::translate("main_window", "Open Recent Files", nullptr));
         menuConfiguration->setTitle(QCoreApplication::translate("main_window", "Options", nullptr));

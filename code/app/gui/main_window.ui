@@ -87,7 +87,7 @@
      <x>0</x>
      <y>0</y>
      <width>1058</width>
-     <height>22</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="contextMenuPolicy">
@@ -134,6 +134,8 @@
     <addaction name="updateAct"/>
     <addaction name="separator"/>
     <addaction name="aboutAppAct"/>
+    <addaction name="aboutFBXAct"/>
+    <addaction name="aboutQtAct"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -185,6 +187,16 @@
    </property>
    <property name="text">
     <string>List Freeze</string>
+   </property>
+  </action>
+  <action name="aboutQtAct">
+   <property name="text">
+    <string>About Qt</string>
+   </property>
+  </action>
+  <action name="aboutFBXAct">
+   <property name="text">
+    <string>About Autodesk® FBX®</string>
    </property>
   </action>
  </widget>

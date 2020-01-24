@@ -15,11 +15,21 @@
 #include <QStyleFactory>
 
 #include "app.h"
-#include "rend/rend.h"
-#include <QVulkanWindow>
+
+static void tempRaiseConsole() {
+	::AllocConsole();
+	::AttachConsole(GetCurrentProcessId());
+	::SetConsoleTitleW(L"Debugout");
+
+	FILE* file = nullptr;
+	freopen_s(&file, "CON", "w", stdout);
+	freopen_s(&file, "CONIN$", "r", stdin);
+}
 
 int main(int argc, char** argv)
 {
+	tempRaiseConsole();
+
 	qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
 	QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
@@ -49,10 +59,7 @@ int main(int argc, char** argv)
 	}
 #endif
 
-
 	appInstance->createWindow();
-	auto interface = createRend(rendBackend::vulkan);
-	//interface.get()->create();
 
 	//TODO: cleanup some stuff?
 	return appInstance->exec();

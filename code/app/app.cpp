@@ -12,7 +12,7 @@
 
 #include "app.h"
 
-#include "rend/rend.h"
+#include "rend/vk/vk_rend.h"
 
 fmtApp::fmtApp(int& argc, char** argv) :
 	QApplication(argc, argv)
@@ -25,7 +25,14 @@ fmtApp::fmtApp(int& argc, char** argv) :
 
 void fmtApp::createWindow()
 {
-	window->init();
+	//TODO: determine backend based on config
+	const auto backendType = rendBackend::vulkan;
+
+	/*create a new renderInterface*/
+	rendI = createRend(nullptr, backendType);
+	window->init(backendType == rendBackend::vulkan ? 
+		reinterpret_cast<vkBackend*>(rendI.get()) : nullptr);
+
 	window->show();
 }
 

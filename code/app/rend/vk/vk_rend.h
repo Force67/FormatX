@@ -11,6 +11,10 @@
 class vkBackend : public rendInterface, public QVulkanWindow
 {
 public:
+	vkBackend(QWindow* parent) :
+		QVulkanWindow(parent)
+	{}
+
 	bool create() override;
 
 	inline QVulkanInstance& vkInstance() {

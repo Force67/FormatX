@@ -21,7 +21,7 @@ static float vertexData[] = { // Y up, front = CCW
 
 static const int UNIFORM_DATA_SIZE = 16 * sizeof(float);
 
-static inline VkDeviceSize aligned(VkDeviceSize v, VkDeviceSize byteAlign)
+static inline constexpr VkDeviceSize aligned(VkDeviceSize v, VkDeviceSize byteAlign)
 {
 	return (v + byteAlign - 1) & ~(byteAlign - 1);
 }
@@ -70,15 +70,17 @@ void vkRend::initResources()
 	const VkPhysicalDeviceLimits* pdevLimits = &be->physicalDeviceProperties()->limits;
 	const VkDeviceSize uniAlign = pdevLimits->minUniformBufferOffsetAlignment;
 
+	auto alignedSize = aligned(aligned(sizeof(vertexData), uniAlign) * concurrentFrameCount + 1, uniAlign);
+		
 	VkBufferCreateInfo bufferInfo{};
-	memset(&bufferInfo, 0, sizeof(bufferInfo));
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-	bufferInfo.size = sizeof(vertexData) * sizeof(float);
+	bufferInfo.size = alignedSize;
 
 	result = devFuncs->vkCreateBuffer(device, &bufferInfo, nullptr, &m_buf);
 	if (result != VkResult::VK_SUCCESS) {
 		printf("Failed to create Vertex Buffer!\n");
+		__debugbreak();
 	}
 
 	//The buffer should be created at this point does not have memory allocated. 
@@ -96,10 +98,12 @@ void vkRend::initResources()
 	result = devFuncs->vkAllocateMemory(device, &allocation, nullptr, &m_bufMem);
 	if (result != VkResult::VK_SUCCESS) {
 		printf("Failed to allocate memory for Vertex Buffer!\n");
+		__debugbreak();
 	}
 	result = devFuncs->vkBindBufferMemory(device, m_buf, m_bufMem, 0);
 	if (result != VkResult::VK_SUCCESS) {
 		printf("Failed to bind buffer!\n");
+		__debugbreak();
 	}
 
 	//Now we have memory allocated and a buffer, we can fill the buffer:
@@ -116,10 +120,10 @@ void vkRend::initResources()
 	memcpy(data, vertexData, sizeof(vertexData));
 	QMatrix4x4 ident;
 	memset(m_uniformBufInfo, 0, sizeof(m_uniformBufInfo));
-	for (int i = 0; i < be->concurrentFrameCount(); ++i) {
+	for (int i = 0; i < concurrentFrameCount; i++) {
 		const VkDeviceSize offset = vertexAllocSize + i * uniformAllocSize;
 		//const auto offset = i * sizeof(QMatrix4x4);
-		memcpy(data + offset, ident.constData(), 16 * sizeof(float));
+		memcpy(data + offset, ident.constData(), sizeof(QMatrix4x4));
 		m_uniformBufInfo[i].buffer = m_buf;
 		m_uniformBufInfo[i].offset = offset;
 		m_uniformBufInfo[i].range = uniformAllocSize;
@@ -503,9 +507,7 @@ bool vkBackend::create()
 	if (!vkInst.create())
 		return false;
 	
-	this->setVulkanInstance(&vkInst);
-	this->resize(1024, 768);
-	this->show();
+	setVulkanInstance(&vkInst);
 	return true;
 }
 
