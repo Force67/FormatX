@@ -14,9 +14,9 @@
 // of -1/1. These will be corrected for by an extra transformation when
 // calculating the modelview-projection matrix.
 static float vertexData[] = { // Y up, front = CCW
-	 0.0f,   0.5f,   1.0f, 0.0f, 0.0f,
-	-0.5f,  -0.5f,   0.0f, 1.0f, 0.0f,
-	 0.5f,  -0.5f,   0.0f, 0.0f, 1.0f
+	 0.0f,  -0.5f,   1.0f, 0.0f, 0.0f,
+	 0.5f,  0.5f,    0.0f, 1.0f, 0.0f,
+	 -0.5f,  0.5f,   0.0f, 0.0f, 1.0f
 };
 
 static const int UNIFORM_DATA_SIZE = 16 * sizeof(float);
@@ -69,16 +69,17 @@ void vkRend::initResources()
 	const int concurrentFrameCount = be->concurrentFrameCount();
 	const VkPhysicalDeviceLimits* pdevLimits = &be->physicalDeviceProperties()->limits;
 	const VkDeviceSize uniAlign = pdevLimits->minUniformBufferOffsetAlignment;
+	const VkDeviceSize vertexAllocSize = aligned(sizeof(vertexData), uniAlign);
+	const VkDeviceSize uniformAllocSize = aligned(UNIFORM_DATA_SIZE, uniAlign);
 
 	VkBufferCreateInfo bufferInfo{};
-	memset(&bufferInfo, 0, sizeof(bufferInfo));
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-	bufferInfo.size = sizeof(vertexData) * sizeof(float);
+	bufferInfo.size = vertexAllocSize + concurrentFrameCount * uniformAllocSize;
 
 	result = devFuncs->vkCreateBuffer(device, &bufferInfo, nullptr, &m_buf);
 	if (result != VkResult::VK_SUCCESS) {
-		printf("Failed to create Vertex Buffer!\n");
+		qDebug("Failed to create Vertex Buffer!\n");
 	}
 
 	//The buffer should be created at this point does not have memory allocated. 
@@ -88,18 +89,17 @@ void vkRend::initResources()
 	devFuncs->vkGetBufferMemoryRequirements(device, m_buf, &memRequirements);
 
 	VkMemoryAllocateInfo allocation{};
-	memset(&allocation, 0, sizeof(allocation));
 	allocation.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocation.allocationSize = memRequirements.size;
 	allocation.memoryTypeIndex = be->hostVisibleMemoryIndex();
 
 	result = devFuncs->vkAllocateMemory(device, &allocation, nullptr, &m_bufMem);
 	if (result != VkResult::VK_SUCCESS) {
-		printf("Failed to allocate memory for Vertex Buffer!\n");
+		qDebug("Failed to allocate memory for Vertex Buffer!\n");
 	}
 	result = devFuncs->vkBindBufferMemory(device, m_buf, m_bufMem, 0);
 	if (result != VkResult::VK_SUCCESS) {
-		printf("Failed to bind buffer!\n");
+		qDebug("Failed to bind buffer!\n");
 	}
 
 	//Now we have memory allocated and a buffer, we can fill the buffer:
@@ -107,19 +107,16 @@ void vkRend::initResources()
 	quint8* data;	
 	result = devFuncs->vkMapMemory(device, m_bufMem, 0, memRequirements.size, 0, reinterpret_cast<void**>(&data));
 	if (result != VkResult::VK_SUCCESS) {
-		printf("Failed to bind buffer!\n");
+		qDebug("Failed to map memory!\n");
 	}
-
-	const VkDeviceSize vertexAllocSize = aligned(sizeof(vertexData), uniAlign);
-	const VkDeviceSize uniformAllocSize = aligned(UNIFORM_DATA_SIZE, uniAlign);
 
 	memcpy(data, vertexData, sizeof(vertexData));
 	QMatrix4x4 ident;
 	memset(m_uniformBufInfo, 0, sizeof(m_uniformBufInfo));
-	for (int i = 0; i < be->concurrentFrameCount(); ++i) {
+	for (int i = 0; i < concurrentFrameCount; ++i) {
 		const VkDeviceSize offset = vertexAllocSize + i * uniformAllocSize;
-		//const auto offset = i * sizeof(QMatrix4x4);
-		memcpy(data + offset, ident.constData(), 16 * sizeof(float));
+		//const auto offset1 = i * sizeof(QMatrix4x4);
+		memcpy(data + offset, ident.constData(), sizeof(QMatrix4x4));
 		m_uniformBufInfo[i].buffer = m_buf;
 		m_uniformBufInfo[i].offset = offset;
 		m_uniformBufInfo[i].range = uniformAllocSize;
@@ -129,8 +126,7 @@ void vkRend::initResources()
 	//next, we create vertex attributes and bind them for the pipeline.
 	//This can be vastly improved, especially when we have a vertex struct later.
 	//TODO: Vertex struct, add Z component to positions.
-	VkVertexInputBindingDescription bindingDescription;
-	memset(&bindingDescription, 0, sizeof(bindingDescription));
+	VkVertexInputBindingDescription bindingDescription{};
 	bindingDescription.binding = 0;
 	bindingDescription.stride = 5 * sizeof(float);
 	bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
@@ -152,8 +148,7 @@ void vkRend::initResources()
 
 
 	//declare number of attributes and layout for the vertex data for the pipeline.
-	VkPipelineVertexInputStateCreateInfo inputInfo;
-	memset(&inputInfo, 0, sizeof(inputInfo));
+	VkPipelineVertexInputStateCreateInfo inputInfo{};
 	inputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	inputInfo.pNext = nullptr;
 	inputInfo.flags = 0;
@@ -163,16 +158,15 @@ void vkRend::initResources()
 	inputInfo.pVertexAttributeDescriptions = attributeDescription;
 
 	// Set up descriptor set and its layout.
-	VkDescriptorPoolSize descPoolSizes = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uint32_t(be->concurrentFrameCount()) };
-	VkDescriptorPoolCreateInfo descPoolInfo;
-	memset(&descPoolInfo, 0, sizeof(descPoolInfo));
+	VkDescriptorPoolSize descPoolSizes = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uint32_t(concurrentFrameCount) };
+	VkDescriptorPoolCreateInfo descPoolInfo{};
 	descPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	descPoolInfo.maxSets = be->concurrentFrameCount();
+	descPoolInfo.maxSets = concurrentFrameCount;
 	descPoolInfo.poolSizeCount = 1;
 	descPoolInfo.pPoolSizes = &descPoolSizes;
 	result = devFuncs->vkCreateDescriptorPool(device, &descPoolInfo, nullptr, &m_descPool);
 	if (result != VK_SUCCESS)
-		printf("Failed to create descriptor pool!");
+		qDebug("Failed to create descriptor pool!");
 
 	VkDescriptorSetLayoutBinding layoutBinding = {
 		0, // binding
@@ -190,9 +184,9 @@ void vkRend::initResources()
 	};
 	result = devFuncs->vkCreateDescriptorSetLayout(device, &descLayoutInfo, nullptr, &m_descSetLayout);
 	if (result != VK_SUCCESS)
-		printf("Failed to create descriptor set layout!");
+		qDebug("Failed to create descriptor set layout!");
 
-	for (int i = 0; i < be->concurrentFrameCount(); ++i) {
+	for (int i = 0; i < concurrentFrameCount; ++i) {
 		VkDescriptorSetAllocateInfo descSetAllocInfo = {
 			VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
 			nullptr,
@@ -202,10 +196,9 @@ void vkRend::initResources()
 		};
 		result = devFuncs->vkAllocateDescriptorSets(device, &descSetAllocInfo, &m_descSet[i]);
 		if (result != VK_SUCCESS)
-			printf("Failed to allocate descriptor set!");
+			qDebug("Failed to allocate descriptor set!");
 
-		VkWriteDescriptorSet descWrite;
-		memset(&descWrite, 0, sizeof(descWrite));
+		VkWriteDescriptorSet descWrite{};
 		descWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		descWrite.dstSet = m_descSet[i];
 		descWrite.descriptorCount = 1;
@@ -215,22 +208,20 @@ void vkRend::initResources()
 	}
 
 	// Pipeline cache
-	VkPipelineCacheCreateInfo pipelineCacheInfo;
-	memset(&pipelineCacheInfo, 0, sizeof(pipelineCacheInfo));
+	VkPipelineCacheCreateInfo pipelineCacheInfo{};
 	pipelineCacheInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
 	result = devFuncs->vkCreatePipelineCache(device, &pipelineCacheInfo, nullptr, &m_pipelineCache);
 	if (result != VK_SUCCESS)
-		printf("Failed to create pipeline cache!");
+		qDebug("Failed to create pipeline cache!");
 
 	//Pipeline layout
-	VkPipelineLayoutCreateInfo pipelineLayoutInfo;
-	memset(&pipelineLayoutInfo, 0, sizeof(pipelineLayoutInfo));
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = 1;
 	pipelineLayoutInfo.pSetLayouts = &m_descSetLayout;
 	result = devFuncs->vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &m_pipelineLayout);
 	if (result != VK_SUCCESS)
-		printf("Failed to create pipeline layout!");
+		qDebug("Failed to create pipeline layout!");
 
 	//import shaders
 	VkShaderModule vertModule = createShaderModule(QStringLiteral("color_vert.spv"));
@@ -240,8 +231,7 @@ void vkRend::initResources()
 	//insert these shaders into the render pipeline.
 	//we create a stage for each shader going to be used; 
 	//in this instance, we are only using a vertex and fragment shader.
-	VkGraphicsPipelineCreateInfo pipeInfo;
-	memset(&pipeInfo, 0, sizeof(pipeInfo));
+	VkGraphicsPipelineCreateInfo pipeInfo{};
 	pipeInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipeInfo.stageCount = 2;
 
@@ -269,16 +259,14 @@ void vkRend::initResources()
 	pipeInfo.pStages = stages;
 	pipeInfo.pVertexInputState = &inputInfo;
 
-	VkPipelineInputAssemblyStateCreateInfo assemblyState;
-	memset(&assemblyState, 0, sizeof(assemblyState));
+	VkPipelineInputAssemblyStateCreateInfo assemblyState{};
 	assemblyState.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	assemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 	pipeInfo.pInputAssemblyState = &assemblyState;
 
 	//create viewport data for the pipeline. 
 	//This can be set later, allowing us to resize the window.
-	VkPipelineViewportStateCreateInfo pipeVP;
-	memset(&pipeVP, 0, sizeof(pipeVP));
+	VkPipelineViewportStateCreateInfo pipeVP{};
 	pipeVP.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 	pipeVP.viewportCount = pipeVP.scissorCount = 1;
 	pipeInfo.pViewportState = &pipeVP;
@@ -286,8 +274,7 @@ void vkRend::initResources()
 	//this declares what we need to set in the rasterizer;
 	//this controls culling, polygon types, eg. wireframe,
 	//and which face is considered the front.
-	VkPipelineRasterizationStateCreateInfo rs;
-	memset(&rs, 0, sizeof(rs));
+	VkPipelineRasterizationStateCreateInfo rs{};
 	rs.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rs.polygonMode = VK_POLYGON_MODE_FILL;
 	rs.cullMode = VK_CULL_MODE_NONE;
@@ -296,34 +283,29 @@ void vkRend::initResources()
 	pipeInfo.pRasterizationState = &rs;
 
 	//used for alpha. (i think).
-	VkPipelineMultisampleStateCreateInfo ms;
-	memset(&ms, 0, sizeof(ms));
+	VkPipelineMultisampleStateCreateInfo ms{};
 	ms.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	ms.rasterizationSamples = be->sampleCountFlagBits();
 	pipeInfo.pMultisampleState = &ms;
 
-	VkPipelineDepthStencilStateCreateInfo ds;
-	memset(&ds, 0, sizeof(ds));
+	VkPipelineDepthStencilStateCreateInfo ds{};
 	ds.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 	ds.depthTestEnable = VK_TRUE;
 	ds.depthWriteEnable = VK_TRUE;
 	ds.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 	pipeInfo.pDepthStencilState = &ds;
 
-	VkPipelineColorBlendStateCreateInfo cb;
-	memset(&cb, 0, sizeof(cb));
+	VkPipelineColorBlendStateCreateInfo cb{};
 	cb.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 
-	VkPipelineColorBlendAttachmentState att;
-	memset(&att, 0, sizeof(att));
+	VkPipelineColorBlendAttachmentState att{};
 	att.colorWriteMask = 0xF;
 	cb.attachmentCount = 1;
 	cb.pAttachments = &att;
 	pipeInfo.pColorBlendState = &cb;
 
 	VkDynamicState dynEnable[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
-	VkPipelineDynamicStateCreateInfo dyn;
-	memset(&dyn, 0, sizeof(dyn));
+	VkPipelineDynamicStateCreateInfo dyn{};
 	dyn.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 	dyn.dynamicStateCount = sizeof(dynEnable) / sizeof(VkDynamicState);
 	dyn.pDynamicStates = dynEnable;
@@ -335,7 +317,7 @@ void vkRend::initResources()
 	//we can finally create the pipeline now the data has been specified above:
 	result = devFuncs->vkCreateGraphicsPipelines(device, m_pipelineCache, 1, &pipeInfo, nullptr, &m_pipeline);
 	if (result != VkResult::VK_SUCCESS) {
-		printf("Failed to create graphics pipeline!\n");
+		qDebug("Failed to create graphics pipeline!\n");
 	}
 
 	//now that the shaders have been loaded into the pipeline, 
@@ -457,12 +439,12 @@ VkShaderModule vkRend::createShaderModule(const QString& name)
 {
 	//open the file and read all the data.
 	if (!QFile::exists(name)) {
-		printf("File %s does not exist!", name.data());
+		qDebug("File %s does not exist!", name.data());
 		return VK_NULL_HANDLE;
 	}
 	QFile file(name);
 	if (!file.open(QIODevice::ReadOnly)) {
-		printf("Failed to open shader file!");
+		qDebug("Failed to open shader file!");
 		return VK_NULL_HANDLE;
 	}
 
@@ -478,7 +460,7 @@ VkShaderModule vkRend::createShaderModule(const QString& name)
 	VkShaderModule shaderModule;
 	VkResult result = devFuncs->vkCreateShaderModule(be->device(), &shaderInfo, nullptr, &shaderModule);
 	if (result != VK_SUCCESS) {
-		printf("Failed to create shader module: %d", result);
+		qDebug("Failed to create shader module: %d", result);
 		return VK_NULL_HANDLE;
 	}
 
