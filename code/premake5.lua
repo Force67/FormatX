@@ -6,28 +6,49 @@ package.path = package.path .. ";../tools/premake/premake-qt/?.lua"
 require('qt')
 qt = premake.extensions.qt
 
+local function get_git_info()
+    branch_name = "unknown_branch"
+    commit_hash = "unknown_commit"
+
+    local f = io.popen('git symbolic-ref --short -q HEAD', 'r')
+    local temp = f:read("*a")
+    f:close()
+
+    -- sanitize
+    branch_name = string.gsub(temp, '\n$', '')
+
+    f = io.popen('git rev-parse --short HEAD', 'r')
+    temp = f:read("*a")
+    f:close()
+
+    commit_hash = string.gsub(temp, '\n$', '')
+end
+
 workspace "FormatX"
     configurations { "Debug", "Release" }
+	
+	architecture "x86_64"
+    vectorextensions "AVX"
 
+    -- build output
     location "../build"
     os.mkdir"../build/symbols"
     targetdir '../bin/%{cfg.buildcfg}'
     
-    platforms { "x64" }
-    targetprefix ""
+    flags "MultiProcessorCompile"
     buildoptions "/std:c++17"
     symbols "On"
     characterset "Unicode"
     
-    -- Enable position-independent-code generation
-    pic "On"
-    startproject "host"
+    get_git_info()
+    defines { "FX_NAME=\"%{wks.name}\"", 
+              "FX_NAME_WIDE=L\"%{wks.name}\"",
+              ('FX_BRANCH="' .. branch_name .. '"'),
+              ('FX_COMMITHASH="' .. commit_hash .. '"'),
+              ('FX_CANARY=') .. (branch_name == "master" and 0 or 1)}
 
-    libdirs
-    {
-        "./shared/Lib",
-    }
-    
+    libdirs "./shared/Lib"
+
     filter "platforms:x64"
          architecture "x86_64"
 
@@ -59,6 +80,7 @@ workspace "FormatX"
             "_SCL_SECURE_NO_DEPRECATE"
         }
         
+    startproject "app"
     group "plugin"
     include "plugins/plugins.lua"
     

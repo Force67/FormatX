@@ -8,20 +8,21 @@
 
 #include "../rend.h"
 
-class vkBackend : public rendInterface, public QVulkanWindow
-{
+namespace rend {
+class vkBackend : public renderInterface, public QVulkanWindow {
 public:
-	vkBackend(QWindow* parent) :
-		QVulkanWindow(parent)
-	{}
+    vkBackend(QWindow* parent) : QVulkanWindow(parent) {}
 
-	bool create() override;
+    bool create() override;
+    void shutdown() override;
+    void renderFrame() override;
 
-	inline QVulkanInstance& vkInstance() {
-		return vkInst;
-	}
+    inline QVulkanInstance& vkInstance() {
+        return vkInst;
+    }
 
 private:
-	QVulkanWindowRenderer* createRenderer() override;
-	QVulkanInstance vkInst;
+    QVulkanWindowRenderer* createRenderer() override;
+    QVulkanInstance vkInst;
 };
+}

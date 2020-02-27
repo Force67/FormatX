@@ -5,8 +5,7 @@
 #include <string>
 
 // implements various path utility functions
-namespace utl
-{
-	std::wstring make_abs_path(const std::wstring &relative, void* handle = nullptr);
-	std::string make_abs_path(const std::string &relative, void* handle = nullptr);
+namespace utl {
+std::wstring make_abs_path(const std::wstring& relative, void* handle = nullptr);
+std::string make_abs_path(const std::string& relative, void* handle = nullptr);
 }

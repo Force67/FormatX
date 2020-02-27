@@ -31,3 +31,18 @@ project "zlib"
         "zlib/*.c"
     }
     
+project "fmtlib"
+    language "C++"
+    kind "StaticLib"
+    
+    includedirs
+    {
+        "fmtlib/include"
+    }
+    
+    files
+    {
+        "fmtlib/include/fmt/*.h",
+        "fmtlib/src/*.cc"
+    }
+    

@@ -12,23 +12,22 @@
 #include "gui/main_window.h"
 #include "rend/rend.h"
 
-class fmtApp : public QApplication
-{
-	Q_OBJECT
+class fmtApp : public QApplication {
+    Q_OBJECT
 public:
-	using pluginList = std::vector<pluginLoader*>;
+    using pluginList = std::vector<pluginLoader*>;
 
-	fmtApp(int&, char**);
+    fmtApp(int&, char**);
 
-	bool loadPlugins();
-	void createWindow();
+    bool loadPlugins();
+    bool createViewport();
 
-	pluginList& getPlugins() {
-		return plugins;
-	}
+    pluginList& getPlugins() {
+        return plugins;
+    }
 
 private:
-	pluginList plugins;
-	std::unique_ptr<mainWindow> window;
-	std::unique_ptr<rendInterface> rendI;
+    pluginList plugins;
+    std::unique_ptr<mainWindow> window;
+    std::unique_ptr<rend::renderInterface> renderer;
 };

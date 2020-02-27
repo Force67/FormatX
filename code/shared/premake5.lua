@@ -11,7 +11,8 @@ project "shared"
 
     includedirs
     {
-        "."
+        ".",
+		"../vendor/fmtlib/include",
     }
 
     files

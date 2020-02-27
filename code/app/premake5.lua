@@ -8,15 +8,19 @@ project "app"
         linkoptions "/ENTRY:mainCRTStartup"
     filter {}
 
+    defines "BUILDING_FORMATX"
+
     links
     {
-        "shared"
+        "shared",
+        "fmtlib"
     }
 
     includedirs
     {
         ".",
-        "../shared"
+        "../shared",
+        "../vendor/fmtlib/include",
     }
 
     files

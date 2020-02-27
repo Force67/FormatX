@@ -5,24 +5,25 @@
 #include <cstdint>
 
 namespace utl {
-	class File;
+class File;
 }
 
-enum class FileResult
-{
-	success,
-	badmagic,
-	badversion,
-	badplatform,
-	fail,
+enum class FileResult {
+    success,
+    badmagic,
+    badversion,
+    badplatform,
+    fail,
 };
 
-class IFileFormat
-{
+class IFileFormat {
 public:
-
-	virtual ~IFileFormat() = default;
-	virtual FileResult Serialize(utl::File&) { return FileResult::success; }
-	virtual FileResult Deserialize(utl::File&) = 0;
-	virtual FileResult ExtractAll(utl::File&) { return FileResult::success; }
+    virtual ~IFileFormat() = default;
+    virtual FileResult Serialize(utl::File&) {
+        return FileResult::success;
+    }
+    virtual FileResult Deserialize(utl::File&) = 0;
+    virtual FileResult ExtractAll(utl::File&) {
+        return FileResult::success;
+    }
 };
