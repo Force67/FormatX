@@ -22,5 +22,7 @@ bool dx12Context::create(const dxgi& dxgiContext) {
 
     //m_rtvDescriptorSize =
     //    m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+    return true;
 }
 } // namespace rend

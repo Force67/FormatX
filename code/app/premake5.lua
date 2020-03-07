@@ -13,8 +13,6 @@ project "app"
     links
     {
         "core",
-        "video_core",
-        
         "common",
         "fmtlib"
     }

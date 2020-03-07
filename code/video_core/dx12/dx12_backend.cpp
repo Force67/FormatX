@@ -74,7 +74,7 @@ bool dx12Backend::create() {
         return false;
     }
 
-    if (FAILED(createDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)))) {
+    if (FAILED(createDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device)))) {
         LOG_ERROR("Failed to create a d3d12 device (feature level 11)");
         return false;
     }
@@ -88,7 +88,7 @@ bool dx12Backend::create() {
         return false;
     }
 
-    if (!dxgiContext.createSwapChain(outputWindow, device.Get())) 
+    if (!dxgiContext.createSwapChain(outputWindow, commandQueue.Get())) 
         return false;
 
     return true;

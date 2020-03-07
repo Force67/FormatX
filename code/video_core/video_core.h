@@ -38,5 +38,5 @@ public:
     }
 };
 
-UniquePtr<renderInterface> createRenderer(renderWindow*, backendKind);
+UniquePtr<renderInterface> createRenderer(renderWindow&, backendKind);
 }

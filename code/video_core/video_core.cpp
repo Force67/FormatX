@@ -8,20 +8,15 @@
  */
 
 #include "video_core.h"
-
 #include "dx12/dx12_backend.h"
-namespace video_core {
-UniquePtr<renderInterface> createRenderer(renderWindow* parent, backendKind kind) {
-    if (!parent) {
-        LOG_ERROR("please supply a renderWindow");
-        return nullptr;
-    }
 
+namespace video_core {
+UniquePtr<renderInterface> createRenderer(renderWindow& parent, backendKind kind) {
     switch (kind) {
     case backendKind::vulkan:
         return nullptr;
     case backendKind::dx12:
-        return std::make_unique<dx12Backend>(parent);
+        return std::make_unique<dx12Backend>(&parent);
     case backendKind::null:
     case backendKind::opengl: {
         __debugbreak();

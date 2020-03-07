@@ -7,26 +7,21 @@
 #include <QIcon>
 #include <QObject>
 
+#include <core.h>
+
 #include <plugin_traits.h>
-#include "gui/main_window.h"
+#include "ui/main_window.h"
 #include "video_core.h"
 
 class fmtApp : public QApplication {
     Q_OBJECT
 public:
-    using pluginList = std::vector<pluginLoader*>;
-
     fmtApp(int&, char**);
 
-    bool loadPlugins();
-    bool createViewport();
-
-    pluginList& getPlugins() {
-        return plugins;
-    }
+    bool init();
+    bool present();
 
 private:
-    pluginList plugins;
-    std::unique_ptr<mainWindow> window;
-    std::unique_ptr<video_core::renderInterface> renderer;
+    mainWindow window;
+    core::fxcore core;
 };

@@ -1,14 +1,23 @@
 
 project "core"
     language "C++"
-    kind "StaticLib"
+    kind "SharedLib"
 
     includedirs
     {
         ".",
-		"./utl",
+        "../common",
+        "../video_core",
         "../vendor/fmtlib/include"
     }
+
+    links {
+        "video_core",
+        "common",
+        "fmtlib"
+    }
+
+    defines "COMPILING_CORE"
 
     files {
         "premake5.lua",

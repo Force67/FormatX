@@ -17,9 +17,6 @@
 #include "load_file_dialog.h"
 #include "main_window.h"
 
-#include "qtgen/ui_main_window.h"
-#include "rend/rend.h"
-
 class fileItemTab : public QWidget {
 public:
     fileItemTab(QWidget* parent, QWidget* dock, bool canRender = false) : QWidget(parent) {
@@ -30,32 +27,34 @@ public:
 };
 
 mainWindow::mainWindow(fmtApp& app) : 
-    app(app), QMainWindow(nullptr), 
-    ui(new Ui::main_window()) 
+    app(app), QMainWindow(nullptr)
 {
     setAcceptDrops(true);
+    rendWindow = std::make_unique<renderWindow>();
 }
 
-void mainWindow::init(QWindow* subWindow, const char *backendName) {
-    ui->setupUi(this);
+void mainWindow::init() {
+    ui.setupUi(this);
     setWindowTitle("FormatX | " FX_BRANCH "@" FX_COMMITHASH);
 
-    connect(ui->openFileAct, &QAction::triggered, this, &mainWindow::onOpenFile);
-    connect(ui->aboutQtAct, &QAction::triggered, qApp, &QApplication::aboutQt);
-    connect(ui->aboutFBXAct, &QAction::triggered,
+    connect(ui.openFileAct, &QAction::triggered, this, &mainWindow::onOpenFile);
+    connect(ui.aboutQtAct, &QAction::triggered, qApp, &QApplication::aboutQt);
+    connect(ui.aboutFBXAct, &QAction::triggered,
             [&] { QMessageBox::about(this, "About Autodesk\302\256 FBX\302\256", licenseText); });
 
     // tab's for quick file switching
     tabBar = std::make_unique<QTabWidget>(this);
 
-    if (subWindow) {
-        // make it a widget so it respects potential future docks
-        auto* dock = new QDockWidget(tr("Render window | %1").arg(backendName), this);
+    if (rendWindow) {
+        auto* dock = new QDockWidget(tr("Render window | %1").arg("FIXME"), this);
         dock->setFeatures(dock->features() & ~QDockWidget::DockWidgetFeature::DockWidgetClosable);
 
-        /*this is a bit of a stupid hack*/
-        rendChild.reset(QWidget::createWindowContainer(subWindow, dock));
+        // wrap the render window within a widget
+        rendChild.reset(QWidget::createWindowContainer(rendWindow.get(), dock));
         dock->setWidget(rendChild.get());
+
+        // ensure geometry is set properly
+        updateChild();
 
         tabBar->addTab(new fileItemTab(tabBar.get(), dock), "testfile.dat");
     }
@@ -87,11 +86,11 @@ void mainWindow::keyPressEvent(QKeyEvent* event) {
         fullmodeEditor = !fullmodeEditor;
 
         if (fullmodeEditor) {
-            ui->menuBar->hide();
+            ui.menuBar->hide();
             setWindowState(Qt::WindowFullScreen);
         } else {
             setWindowState(Qt::WindowMaximized);
-            ui->menuBar->show();
+            ui.menuBar->show();
         }
     }
 }

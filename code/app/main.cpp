@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 
     // TODO: parse positional arguments
     QScopedPointer<fmtApp> appInstance(new fmtApp(argc, argv));
-    if (!appInstance->loadPlugins())
+    if (!appInstance->init())
         return 0;
 
 #ifdef _WIN32
@@ -52,7 +52,8 @@ int main(int argc, char** argv) {
     }
 #endif
 
-    if (!appInstance->createViewport())
+    // everything OK, present app
+    if (!appInstance->present())
         return 0;
 
     // TODO: cleanup some stuff?

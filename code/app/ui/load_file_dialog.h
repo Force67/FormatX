@@ -5,7 +5,7 @@
 #include <QDialog>
 #include <QWindow>
 
-#include <plugintraits.h>
+#include <plugin_traits.h>
 
 namespace Ui {
 class load_file_dialog;

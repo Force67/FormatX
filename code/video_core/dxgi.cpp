@@ -7,7 +7,6 @@
  * in the root of the source tree.
  */
 
-#include <VersionHelpers.h>
 #include <dxgidebug.h>
 
 #include "dxgi.h"
@@ -81,8 +80,11 @@ bool dxgi::init(bool forceNewDxgi, UINT factoryFlags) {
 bool dxgi::createSwapChain(renderWindow* window, IUnknown* device) {
     uint32_t width, height;
     window->getDimensions(width, height);
+    
+    if (width == 0 || height == 0)
+        LOG_WARNING("attempting to create an invisible window");
 
-    bool supportsTearing = false;
+    BOOL supportsTearing = 0;
 
     // will crash on w7
     if (createFactory2) {

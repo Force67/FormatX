@@ -6,9 +6,8 @@
 #include <QDockWidget>
 #include <QMainWindow>
 
-namespace Ui {
-class main_window;
-}
+#include "render_window.h"
+#include "qtgen/ui_main_window.h"
 
 class fmtApp;
 
@@ -17,9 +16,9 @@ class mainWindow : public QMainWindow {
 
 public:
     mainWindow(fmtApp&);
+    void init();
 
-    void init(QWindow*, const char*);
-
+    renderWindow& getRenderWindow() { return *rendWindow;}
 private:
     /*callbacks*/
     void onOpenFile();
@@ -34,8 +33,10 @@ private:
 
     void updateChild();
 
+    Ui::main_window ui;
+
     fmtApp& app;
-    std::unique_ptr<Ui::main_window> ui;
+    std::unique_ptr<renderWindow> rendWindow;
     std::unique_ptr<QWidget> rendChild;
     std::unique_ptr<QTabWidget> tabBar;
 

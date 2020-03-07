@@ -50,6 +50,8 @@ void loadFileDialog::onCancel() {
 }
 
 bool loadFileDialog::load(fmtApp& app, const QString& path) {
+    return false;
+    #if 0
     filePath = path;
 
     auto bytes = path.toUtf8();
@@ -79,4 +81,5 @@ bool loadFileDialog::load(fmtApp& app, const QString& path) {
 
     // failed to find a suitable file loader
     return acceptibleFiles > 0;
+    #endif
 }
