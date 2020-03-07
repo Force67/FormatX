@@ -1,5 +1,5 @@
 
-project "shared"
+project "common"
     language "C++"
     kind "StaticLib"
 

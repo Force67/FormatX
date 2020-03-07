@@ -1,14 +1,17 @@
 #pragma once
 
-// Copyright (C) 2019-2020 Force67
+/*
+ * FormatX : Video core
+ *
+ * Copyright 2019-2020 Force67.
+ * For information regarding licensing see LICENSE
+ * in the root of the source tree.
+ */
 
-#include <wrl.h>
 #include <d3d12.h>
-#include <dxgi1_4.h>
+#include "dxgi.h"
 
-class QWindow;
-
-namespace rend {
+namespace video_core {
 // for ComPtr
 using namespace Microsoft::WRL;
 
@@ -18,7 +21,7 @@ class dx12Context {
 public:
     explicit dx12Context(dx12Backend*);
 
-    bool create();
+    bool create(const dxgi&);
 
 private:
     dx12Backend* backend;

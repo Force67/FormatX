@@ -7,10 +7,9 @@
 #include <QIcon>
 #include <QObject>
 
-#include <plugintraits.h>
-
+#include <plugin_traits.h>
 #include "gui/main_window.h"
-#include "rend/rend.h"
+#include "video_core.h"
 
 class fmtApp : public QApplication {
     Q_OBJECT
@@ -29,5 +28,5 @@ public:
 private:
     pluginList plugins;
     std::unique_ptr<mainWindow> window;
-    std::unique_ptr<rend::renderInterface> renderer;
+    std::unique_ptr<video_core::renderInterface> renderer;
 };

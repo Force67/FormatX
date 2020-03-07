@@ -1,13 +1,14 @@
 
 // Copyright (C) 2019-2020 Force67, Greavesy
 
+#if 0
 #include "vk_rend.h"
 
 #include <QFile>
 #include <QString>
 #include <QVulkanFunctions>
 
-namespace rend {
+namespace video_core {
 // https://code.woboq.org/qt5/qtbase/examples/vulkan/hellovulkancubes/vulkanwindow.cpp.html
 
 // Note that the vertex data and the projection matrix assume OpenGL. With
@@ -445,6 +446,10 @@ VkShaderModule vkRend::createShaderModule(const QString& name) {
         return VK_NULL_HANDLE;
     }
 
+    std::greater<int>();
+
+    std::sort(v.begin)
+
     return shaderModule;
 }
 
@@ -480,3 +485,4 @@ QVulkanWindowRenderer* vkBackend::createRenderer() {
     return new vkRend(this);
 }
 }
+#endif

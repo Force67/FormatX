@@ -26,8 +26,8 @@ end
 
 workspace "FormatX"
     configurations { "Debug", "Release" }
-	
-	architecture "x86_64"
+    
+    architecture "x86_64"
     vectorextensions "AVX"
 
     -- build output
@@ -86,10 +86,10 @@ workspace "FormatX"
     
     group "app"
     include "./app"
+	include "./core"
+    include "./video_core"
+	include "./common"
 
-    group "sharedstuff"
-    include "./shared"
-    
     group "vendor"
     include "./vendor/3rdparty.lua"
 

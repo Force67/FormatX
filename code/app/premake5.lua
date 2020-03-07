@@ -12,14 +12,19 @@ project "app"
 
     links
     {
-        "shared",
+        "core",
+        "video_core",
+        
+        "common",
         "fmtlib"
     }
 
     includedirs
     {
         ".",
-        "../shared",
+        "../common",
+        "../core",
+        "../video_core",
         "../vendor/fmtlib/include",
     }
 
@@ -29,7 +34,7 @@ project "app"
         "**.h",
         "**.cpp",
         "**.ui",
-		"**.inl"
+        "**.inl"
     }
 
     -- fetch vk dir from path

@@ -7,12 +7,32 @@
 
 #include <QDirIterator>
 #include <QMessageBox>
+#include <QWindow>
+
 #include <utl/File.h>
 #include <utl/path.h>
 
 #include "app.h"
 
-#include "rend/vk/vk_rend.h"
+#include <video_core.h>
+
+// todo: move this
+namespace {
+class renderWindowQt : public video_core::renderWindow, public QWindow {
+public:
+    void* getHandle() override;
+    void getDimensions(u32& width, u32& height);
+};
+
+void* renderWindowQt::getHandle() {
+    return reinterpret_cast<void*>(winId());
+}
+
+void renderWindowQt::getDimensions(u32& width, u32& height) {
+    width = this->width();
+    height = this->height();
+}
+} // namespace
 
 fmtApp::fmtApp(int& argc, char** argv) : QApplication(argc, argv) {
     setApplicationName("FormatX");
@@ -23,27 +43,24 @@ fmtApp::fmtApp(int& argc, char** argv) : QApplication(argc, argv) {
 
 bool fmtApp::createViewport() {
     // TODO: determine backend based on config
-    const auto backendType = rend::backendKind::vulkan;
+    const auto backendType = video_core::backendKind::dx12;
 
-    renderer = rend::createRenderer(nullptr, backendType);
+    static auto outw = std::make_unique<renderWindowQt>();
 
-    // special wrap feature for VK
-    QWindow* wrapWindow = backendType == rend::backendKind::vulkan
-                          ? reinterpret_cast<rend::vkBackend*>(renderer.get())
-                          : nullptr;
+    renderer = video_core::createRenderer(outw.get(), backendType);
 
     const char* name;
     switch (backendType) {
-    case rend::backendKind::dx12:
+    case video_core::backendKind::dx12:
         name = "DirectX 12";
         break;
-    case rend::backendKind::opengl:
+    case video_core::backendKind::opengl:
         name = "OpenGL";
         break;
-    case rend::backendKind::vulkan:
+    case video_core::backendKind::vulkan:
         name = "Vulkan";
         break;
-    case rend::backendKind::null:
+    case video_core::backendKind::null:
     default:
         name = "Null";
         break;
@@ -51,7 +68,7 @@ bool fmtApp::createViewport() {
 
     // init the renderer
     if (renderer->create()) {
-        window->init(wrapWindow, name);
+        window->init(nullptr, name);
 
         LOG_INFO("Initializing {} renderer", name);
 
