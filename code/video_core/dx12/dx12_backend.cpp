@@ -91,7 +91,7 @@ bool dx12Backend::create() {
     if (!dxgiContext.createSwapChain(outputWindow, commandQueue.Get())) 
         return false;
 
-    return true;
+    return context.create(dxgiContext);
 }
 
 void dx12Backend::shutdown() {

@@ -12,7 +12,6 @@
 #include <QMimeData>
 #include <QVBoxLayout>
 
-#include "app.h"
 #include "license_text.h"
 #include "load_file_dialog.h"
 #include "main_window.h"
@@ -26,11 +25,9 @@ public:
     }
 };
 
-mainWindow::mainWindow(fmtApp& app) : 
-    app(app), QMainWindow(nullptr)
-{
+mainWindow::mainWindow(core::FXCore& app) : 
+    app(app), QMainWindow(nullptr), tabBar(this) {
     setAcceptDrops(true);
-    rendWindow = std::make_unique<renderWindow>();
 }
 
 void mainWindow::init() {
@@ -42,24 +39,18 @@ void mainWindow::init() {
     connect(ui.aboutFBXAct, &QAction::triggered,
             [&] { QMessageBox::about(this, "About Autodesk\302\256 FBX\302\256", licenseText); });
 
-    // tab's for quick file switching
-    tabBar = std::make_unique<QTabWidget>(this);
+    auto* dock = new QDockWidget(tr("Render window | %1").arg("FIXME"), this);
+    dock->setFeatures(dock->features() & ~QDockWidget::DockWidgetFeature::DockWidgetClosable);
 
-    if (rendWindow) {
-        auto* dock = new QDockWidget(tr("Render window | %1").arg("FIXME"), this);
-        dock->setFeatures(dock->features() & ~QDockWidget::DockWidgetFeature::DockWidgetClosable);
+    // wrap the render window within a widget
+    rendChild = QWidget::createWindowContainer(&renderView, dock);
+    dock->setWidget(rendChild);
 
-        // wrap the render window within a widget
-        rendChild.reset(QWidget::createWindowContainer(rendWindow.get(), dock));
-        dock->setWidget(rendChild.get());
+    tabBar.addTab(new fileItemTab(&tabBar, dock), "testfile.dat");
+    setCentralWidget(&tabBar);
 
-        // ensure geometry is set properly
-        updateChild();
-
-        tabBar->addTab(new fileItemTab(tabBar.get(), dock), "testfile.dat");
-    }
-
-    setCentralWidget(tabBar.get());
+    // ensure geometry is set properly
+    updateChild();
 }
 
 // stupid hack since i cant get some *decent* looking alignment working using qt

@@ -2,82 +2,37 @@
 project "app"
     language "C++"
     kind "WindowedApp"
-    targetname "formatx"
+    targetname "FormatX"
 
     filter "system:windows"
         linkoptions "/ENTRY:mainCRTStartup"
     filter {}
 
-    defines "BUILDING_FORMATX"
+        -- win/project resource description
+    defines { "rsc_company=\"Dev-Force\"",
+              "rsc_copyright=\"(C) Force67 2019-2020. All rights reserved\"",
+              "rsc_fileversion=\"1.0.0.0\"", 
+              "rsc_productversion=\"1.0.0.0\"",
+              "rsc_internalname=\"%{prj.name}\"",
+              "rsc_productname=\"FormatX\"",
+              "rsc_originalname=\"%{prj.name}%{prj.targetextension}\"",
+              "rsc_description=\"Asset Editing Utility\"" }
 
     links
     {
-        "core",
-        "common",
-        "fmtlib"
+        "FormatX"
     }
 
     includedirs
     {
         ".",
-        "../common",
         "../core",
-        "../video_core",
-        "../vendor/fmtlib/include",
     }
 
     files
     {
         "premake5.lua",
+        "_res/app.rc",
         "**.h",
         "**.cpp",
-        "**.ui",
-        "**.inl"
     }
-
-    -- fetch vk dir from path
-    local vkd = os.getenv("VULKAN_SDK")
-    if vkd then
-        libdirs(vkd .. "\\Lib")
-        includedirs(vkd .. "\\Include")
-
-        links 
-        {
-            "vulkan-1",
-            "VkLayer_utils"
-        }
-
-        defines "QT_FEATURE_vulkan"
-    end
-    
-    -- enable qt for this project
-    qt.enable()
-    
-    qtmodules {
-        "core",
-        "gui",
-        "widgets",
-        "opengl"
-    }
-
-    filter "system:windows"
-        qtmodules {
-            "winextras",
-            "qml"
-        }
-    filter {}
-    
-    qtprefix "Qt5"
-    qtgenerateddir "qtgen"
-
-    -- for ci
-    local qtd = os.getenv("Qt5_Dir")
-    if qtd then
-        qtpath(qtd)
-    end
-    
-    -- use debug versions of qt
-    -- libs in debug builds
-    configuration { "Debug" }
-            qtsuffix "d"
-    configuration {}

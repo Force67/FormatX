@@ -84,6 +84,8 @@ bool dxgi::createSwapChain(renderWindow* window, IUnknown* device) {
     if (width == 0 || height == 0)
         LOG_WARNING("attempting to create an invisible window");
 
+    // it has to be a win32 BOOL type, as it is defined as int so it's bigger than
+    // a regular bool (1)
     BOOL supportsTearing = 0;
 
     // will crash on w7

@@ -1,5 +1,5 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'app.h'
+** Meta object code from reading C++ file 'core.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.14.0)
 **
@@ -7,11 +7,11 @@
 *****************************************************************************/
 
 #include <memory>
-#include "../app.h"
+#include "../core.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'app.h' doesn't include <QObject>."
+#error "The header file 'core.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.14.0. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -21,25 +21,25 @@
 QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
-struct qt_meta_stringdata_fmtApp_t {
+struct qt_meta_stringdata_core__FXCore_t {
     QByteArrayData data[1];
-    char stringdata0[7];
+    char stringdata0[13];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_fmtApp_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_core__FXCore_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_fmtApp_t qt_meta_stringdata_fmtApp = {
+static const qt_meta_stringdata_core__FXCore_t qt_meta_stringdata_core__FXCore = {
     {
-QT_MOC_LITERAL(0, 0, 6) // "fmtApp"
+QT_MOC_LITERAL(0, 0, 12) // "core::FXCore"
 
     },
-    "fmtApp"
+    "core::FXCore"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_fmtApp[] = {
+static const uint qt_meta_data_core__FXCore[] = {
 
  // content:
        8,       // revision
@@ -55,7 +55,7 @@ static const uint qt_meta_data_fmtApp[] = {
        0        // eod
 };
 
-void fmtApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void core::FXCore::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
     Q_UNUSED(_id);
@@ -63,30 +63,30 @@ void fmtApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
     Q_UNUSED(_a);
 }
 
-QT_INIT_METAOBJECT const QMetaObject fmtApp::staticMetaObject = { {
+QT_INIT_METAOBJECT const QMetaObject core::FXCore::staticMetaObject = { {
     QMetaObject::SuperData::link<QApplication::staticMetaObject>(),
-    qt_meta_stringdata_fmtApp.data,
-    qt_meta_data_fmtApp,
+    qt_meta_stringdata_core__FXCore.data,
+    qt_meta_data_core__FXCore,
     qt_static_metacall,
     nullptr,
     nullptr
 } };
 
 
-const QMetaObject *fmtApp::metaObject() const
+const QMetaObject *core::FXCore::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *fmtApp::qt_metacast(const char *_clname)
+void *core::FXCore::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_fmtApp.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_core__FXCore.stringdata0))
         return static_cast<void*>(this);
     return QApplication::qt_metacast(_clname);
 }
 
-int fmtApp::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int core::FXCore::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QApplication::qt_metacall(_c, _id, _a);
     return _id;

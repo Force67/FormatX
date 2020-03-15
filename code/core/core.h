@@ -13,36 +13,38 @@
 #include <plugin_traits.h>
 #include <utl/logger/logger.h>
 
-#ifdef _WIN32 
-#ifdef COMPILING_CORE
-#define CORE_API __declspec(dllexport)
-#else
-#define CORE_API __declspec(dllimport)
-#endif
-#endif
+#include <QApplication>
+#include <QFontDatabase>
+#include <QIcon>
+#include <QObject>
 
-// forward decl vcore
-// so we dont include it everywhere
-namespace video_core {
-class renderWindow;
-class renderInterface;
-}
+#include <base.h>
+#include <core.h>
+
+#include "ui/main_window.h"
 
 namespace core {
 enum class result {
-    success,
-    failed,
+    Success,
+    ErrorRenderer,
 };
 
-class fxcore {
-public:
-    CORE_API fxcore();
-    CORE_API ~fxcore();
-    CORE_API result init(video_core::renderWindow&);
+class FXCore final : public QApplication {
+    Q_OBJECT
 
-    auto& getPlugins() const { return pluginList; }
+public:
+    FXCore(int&, char**);
+    bool init();
+
+    auto& getPlugins() const {
+        return pluginList;
+    }
 
 private:
+    result initRenderer(video_core::renderWindow&);
+
+    mainWindow window;
+
     UniquePtr<video_core::renderInterface> renderer;
     std::vector<pluginLoader*> pluginList;
 };

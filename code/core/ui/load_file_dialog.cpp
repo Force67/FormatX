@@ -4,7 +4,6 @@
 #include <QAction>
 #include <QObject>
 
-#include "app.h"
 #include "load_file_dialog.h"
 #include "qtgen/ui_load_file_dialog.h"
 
@@ -49,7 +48,7 @@ void loadFileDialog::onCancel() {
     destroy();
 }
 
-bool loadFileDialog::load(fmtApp& app, const QString& path) {
+bool loadFileDialog::load(core::FXCore& app, const QString& path) {
     return false;
     #if 0
     filePath = path;

@@ -11,7 +11,9 @@ namespace Ui {
 class load_file_dialog;
 }
 
-class fmtApp;
+namespace core {
+class FXCore;
+}
 
 class loadFileDialog : public QDialog {
     Q_OBJECT
@@ -20,7 +22,7 @@ public:
     loadFileDialog(QWidget*);
     ~loadFileDialog();
 
-    bool load(fmtApp&, const QString& path);
+    bool load(core::FXCore&, const QString& path);
 
 private slots:
     void onConfirm();

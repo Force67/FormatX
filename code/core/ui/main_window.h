@@ -9,16 +9,18 @@
 #include "render_window.h"
 #include "qtgen/ui_main_window.h"
 
-class fmtApp;
+namespace core {
+class FXCore;
+}
 
 class mainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    mainWindow(fmtApp&);
+    mainWindow(core::FXCore&);
     void init();
 
-    renderWindow& getRenderWindow() { return *rendWindow;}
+    renderWindow& getRenderWindow() { return renderView;}
 private:
     /*callbacks*/
     void onOpenFile();
@@ -34,11 +36,10 @@ private:
     void updateChild();
 
     Ui::main_window ui;
-
-    fmtApp& app;
-    std::unique_ptr<renderWindow> rendWindow;
-    std::unique_ptr<QWidget> rendChild;
-    std::unique_ptr<QTabWidget> tabBar;
+    renderWindow renderView;
+    QWidget *rendChild;
+    QTabWidget tabBar;
+    core::FXCore& app;
 
     bool fullmodeEditor = false;
 };

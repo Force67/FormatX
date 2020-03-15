@@ -13,12 +13,14 @@
 #include "logger.h"
 
 namespace utl {
-class fileOut final : public logBase {
+namespace {
+
+class fileSink final : public logBase {
     FILE* handle{nullptr};
     size_t bytes_written{0};
 
 public:
-    explicit fileOut(const std::wstring& filename) {
+    explicit fileSink(const std::wstring& filename) {
         _wfopen_s(&handle, filename.c_str(), L"w");
     }
 
@@ -52,7 +54,7 @@ static void PrintMessage(const logEntry& entry) {
     puts(str.c_str());
 }
 
-class conOut_Win final : public logBase {
+class consoleSink final : public logBase {
 
 public:
     const char* getName() override {
@@ -98,7 +100,7 @@ public:
     }
 };
 
-class dbgOut_Win32 final : public logBase {
+class debugSink final : public logBase {
 public:
     const char* getName() override {
         return "dbgOut";
@@ -109,29 +111,36 @@ public:
         OutputDebugStringA(str.c_str());
     }
 };
+} // namespace
 
 void createLogger(bool createConsole) {
     if (createConsole) {
-        ::AllocConsole();
-        ::AttachConsole(GetCurrentProcessId());
-        ::SetConsoleTitleW(FX_NAME_WIDE L" - console");
 
-        FILE* file = nullptr;
-        freopen_s(&file, "CON", "w", stdout);
-        freopen_s(&file, "CONIN$", "r", stdin);
+        // check if there is already an existing console
+        // that we can attach to
+        DWORD pid = GetCurrentProcessId();
+        if (!::AttachConsole(pid)) {
+            ::AllocConsole();
+            ::AttachConsole(pid);
+            ::SetConsoleTitleW(FX_NAME_WIDE L" - console");
 
-        addLogSink(std::make_unique<conOut_Win>());
+            FILE* file = nullptr;
+            freopen_s(&file, "CON", "w", stdout);
+            freopen_s(&file, "CONIN$", "r", stdin);
+        }
+
+        addLogSink(std::make_unique<consoleSink>());
     }
 
     // attach the sinks to the log system
-    addLogSink(std::make_unique<fileOut>(FX_NAME_WIDE L".log"));
+    addLogSink(std::make_unique<fileSink>(FX_NAME_WIDE L".log"));
 
     if (IsDebuggerPresent())
-        addLogSink(std::make_unique<dbgOut_Win32>());
+        addLogSink(std::make_unique<debugSink>());
 
     // attempt to properly close log file in case of a crash
     std::atexit([]() {
-        auto* sink = static_cast<fileOut*>(getLogSink("fileOut"));
+        auto* sink = static_cast<fileSink*>(getLogSink("fileOut"));
         if (sink)
             sink->close();
     });
