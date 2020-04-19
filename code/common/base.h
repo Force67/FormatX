@@ -70,7 +70,8 @@ using UniquePtr = std::unique_ptr<T>;
 #endif
 
 #ifdef _WIN32
-#define EXPORT extern "C" __declspec(dllexport)
+#define EXPORT __declspec(dllexport)
+#define IMPORT __declspec(dllimport)
 #elif
 #define EXPORT
 #endif

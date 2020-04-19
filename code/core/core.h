@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- * FormatX : Video core
+ * FormatX
  *
  * Copyright 2019-2020 Force67.
  * For information regarding licensing see LICENSE
@@ -13,39 +13,27 @@
 #include <plugin_traits.h>
 #include <utl/logger/logger.h>
 
-#include <QApplication>
-#include <QFontDatabase>
-#include <QIcon>
-#include <QObject>
-
 #include <base.h>
 #include <core.h>
 
-#include "ui/main_window.h"
+#include "window.h"
+#include "ui/editor.h"
 
-namespace core {
-enum class result {
-    Success,
-    ErrorRenderer,
-};
-
-class FXCore final : public QApplication {
-    Q_OBJECT
-
+class FXCore {
 public:
-    FXCore(int&, char**);
-    bool init();
+    FXCore(int, char**);
+    ~FXCore();
 
-    auto& getPlugins() const {
-        return pluginList;
-    }
+    bool init();
+    i32 exec();
 
 private:
-    result initRenderer(video_core::renderWindow&);
+    bool createViewport();
 
-    mainWindow window;
-
+    FXWindow window;
     UniquePtr<video_core::renderInterface> renderer;
-    std::vector<pluginLoader*> pluginList;
+    UniquePtr<ui::FXEditor> editor;
+
+    std::vector<std::string> argv;
+    std::vector<pluginLoader*> plugins;
 };
-}

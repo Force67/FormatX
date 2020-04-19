@@ -1,60 +1,82 @@
 
 /*
- * FormatX : Video core
+ * FormatX 
  *
  * Copyright 2019-2020 Force67.
  * For information regarding licensing see LICENSE
  * in the root of the source tree.
  */
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 #include "core.h"
 #include "video_core.h"
 
-namespace core {
-FXCore::FXCore(int& argc, char** argv) : QApplication(argc, argv), window(*this) {}
+constexpr video_core::RenderApi BACKEND_TYPE = video_core::RenderApi::opengl;
 
-result FXCore::initRenderer(video_core::renderWindow& renderTo) {
-    // TODO: determine backend based on config
-    const auto backendType = video_core::backendKind::dx12;
+FXCore::FXCore(int argc, char** argv) {
+    if (argc > 1) {
+        std::vector<std::string> xargv;
 
-    renderer = video_core::createRenderer(renderTo, backendType);
+        for (int i = 1; i < argc; i++)
+            xargv.emplace_back(argv[i]);
 
-    const char* name;
-    switch (backendType) {
-    case video_core::backendKind::dx12:
-        name = "DirectX 12";
-        break;
-    case video_core::backendKind::opengl:
-        name = "OpenGL";
-        break;
-    case video_core::backendKind::vulkan:
-        name = "Vulkan";
-        break;
-    case video_core::backendKind::null:
-    default:
-        name = "Null";
-        break;
+        this->argv = std::move(xargv);
     }
+}
 
-    // init the renderer
-    if (renderer->create()) {
-        LOG_INFO("Started with {} renderer", name);
-    } else
-        return result::ErrorRenderer;
-
-    return result::Success;
+FXCore::~FXCore() {
+    if (renderer)
+        renderer->shutdown();
 }
 
 bool FXCore::init() {
-    window.init();
-
-    window.show(); // temp hack for generating geometry
-    const auto state = initRenderer(window.getRenderWindow());
-    if (state != core::result::Success) {
-        LOG_ERROR("Failed to initialize core (Result {})", static_cast<int>(state));
+    if (!createViewport()) {
         return false;
     }
 
+    editor = std::make_unique<ui::FXEditor>(window);
+    if (!editor->create(*renderer))
+        __debugbreak();
+
     return true;
 }
+
+bool FXCore::createViewport() {
+    auto apiType = BACKEND_TYPE;
+
+    if (window.create(apiType)) {
+
+        video_core::RenderInstanceDesc desc{};
+        desc.flags = video_core::enable_validation;
+        desc.appName = "FormatX";
+        desc.apiType = apiType;
+
+        renderer = video_core::createRenderer(window, desc);
+        if (!renderer) {
+            LOG_ERROR("Failed to create renderer. Error code: {}", static_cast<i32>(apiType));
+            return false;
+        }
+
+        if (renderer->init()) {
+            LOG_INFO("Render init success");
+            window.show();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+i32 FXCore::exec() {
+    while (true) {
+        // exit requested
+        if (!window.update()) break;
+    
+        editor->update();
+        renderer->present();
+    }
+    return 0;
 }

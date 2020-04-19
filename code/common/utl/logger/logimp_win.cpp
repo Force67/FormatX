@@ -122,7 +122,7 @@ void createLogger(bool createConsole) {
         if (!::AttachConsole(pid)) {
             ::AllocConsole();
             ::AttachConsole(pid);
-            ::SetConsoleTitleW(FX_NAME_WIDE L" - console");
+            ::SetConsoleTitleW(PRJ_NAME_WIDE L" - console");
 
             FILE* file = nullptr;
             freopen_s(&file, "CON", "w", stdout);
@@ -133,7 +133,7 @@ void createLogger(bool createConsole) {
     }
 
     // attach the sinks to the log system
-    addLogSink(std::make_unique<fileSink>(FX_NAME_WIDE L".log"));
+    addLogSink(std::make_unique<fileSink>(PRJ_NAME_WIDE L".log"));
 
     if (IsDebuggerPresent())
         addLogSink(std::make_unique<debugSink>());

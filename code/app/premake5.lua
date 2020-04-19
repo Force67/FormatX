@@ -4,6 +4,10 @@ project "app"
     kind "WindowedApp"
     targetname "FormatX"
 
+    -- dont generate a FormatX.lib file
+    flags { "NoImportLib" }
+
+    -- use int main instead of WINMAIN
     filter "system:windows"
         linkoptions "/ENTRY:mainCRTStartup"
     filter {}
@@ -17,6 +21,8 @@ project "app"
               "rsc_productname=\"FormatX\"",
               "rsc_originalname=\"%{prj.name}%{prj.targetextension}\"",
               "rsc_description=\"Asset Editing Utility\"" }
+
+    libdirs "%{cfg.targetdir}"
 
     links
     {

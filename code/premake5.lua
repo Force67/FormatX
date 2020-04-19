@@ -1,27 +1,20 @@
 
-premake.path = premake.path .. ";build"
-package.path = package.path .. ";../tools/premake/premake-qt/?.lua"
+git_branch = ""
+git_commit = ""
 
--- qt short alias 
-require('qt')
-qt = premake.extensions.qt
-
-local function get_git_info()
-    branch_name = "unknown_branch"
-    commit_hash = "unknown_commit"
-
+local function git_info()
     local f = io.popen('git symbolic-ref --short -q HEAD', 'r')
     local temp = f:read("*a")
     f:close()
 
     -- sanitize
-    branch_name = string.gsub(temp, '\n$', '')
+    git_branch = string.gsub(temp, '\n$', '')
 
     f = io.popen('git rev-parse --short HEAD', 'r')
     temp = f:read("*a")
     f:close()
 
-    commit_hash = string.gsub(temp, '\n$', '')
+    git_commit = string.gsub(temp, '\n$', '')
 end
 
 workspace "FormatX"
@@ -40,12 +33,12 @@ workspace "FormatX"
     symbols "On"
     characterset "Unicode"
     
-    get_git_info()
-    defines { "FX_NAME=\"%{wks.name}\"", 
-              "FX_NAME_WIDE=L\"%{wks.name}\"",
-              ('FX_BRANCH="' .. branch_name .. '"'),
-              ('FX_COMMITHASH="' .. commit_hash .. '"'),
-              ('FX_CANARY=') .. (branch_name == "master" and 0 or 1)}
+    git_info()
+    defines { ("PRJ_NAME=\"%{wks.name}\""), 
+              ("PRJ_NAME_WIDE=L\"%{wks.name}\""),
+              ('GIT_BRANCH="' .. git_branch .. '"'),
+              ('GIT_COMMIT="' .. git_commit .. '"'),
+              ('PRJ_CANARY=') .. (git_branch == "master" and 0 or 1) }
 
     libdirs "./shared/Lib"
 

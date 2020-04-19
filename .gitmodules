@@ -7,3 +7,9 @@
 [submodule "code/vendor/fmtlib"]
 	path = code/vendor/fmtlib
 	url = https://github.com/fmtlib/fmt
+[submodule "code/vendor/imgui"]
+	path = code/vendor/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "code/vendor/glfw"]
+	path = code/vendor/glfw
+	url = https://github.com/glfw/glfw.git
