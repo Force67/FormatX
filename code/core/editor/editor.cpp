@@ -79,7 +79,7 @@ void FXEditor::init() {
         
 
     ImGuiStyle* style = &ImGui::GetStyle();
-    style->ScaleAllSizes(2.f);
+    style->ScaleAllSizes(FXWindow::getHDPIScale());
 
     ImVec4* colors = style->Colors;
 

@@ -101,3 +101,11 @@ bool FXWindow::update() {
 
     return true;
 }
+
+float FXWindow::getHDPIScale() {
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    float xscale, yscale;
+    glfwGetMonitorContentScale(monitor, &xscale, &yscale);
+
+    return xscale;
+}

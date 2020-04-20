@@ -325,7 +325,12 @@ bool ImguiDriver::create(GLRenderer& renderer) {
     glGenBuffers(1, &vertexBuffer);
     glGenBuffers(1, &arrayList);
 
-    auto* font = ctx->IO.Fonts->AddFontFromFileTTF(R"(C:\\Windows\\Fonts\\Verdana.ttf)", 20.0f);
+    //ImFontConfig config;
+    //config.SizePixels = 20.f;
+    //config.
+
+    auto* font = ctx->IO.Fonts->AddFontFromFileTTF(R"(C:\\Windows\\Fonts\\Verdana.ttf)",
+                                                   FXWindow::getHDPIScale() * 18.f);
     if (!font) {
         LOG_ERROR("Unable to load font");
         return false;

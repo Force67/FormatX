@@ -34,6 +34,8 @@ public:
         return frameSize;
     }
 
+    static float getHDPIScale();
+
 private:
     glm::i32vec2 frameSize;
 
