@@ -22,7 +22,7 @@ public:
     void init();
     void update();
 
-    void resize();
+    void resize(i32, i32);
 private:
     static void setupKeybinds();
 };

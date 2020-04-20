@@ -31,9 +31,12 @@ protected:
     void poll();
     void render();
 
-    void resize();
+    void resize(i32, i32);
 
 private:
+    i32 lastX = 0;
+    i32 lastY = 0;
+
     void renderDrawData(ImDrawData*);
     void setupRenderstate(ImDrawData*, i32, i32, u32);
 

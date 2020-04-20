@@ -7,6 +7,7 @@
 #ifdef _WIN32
 
 #include <shellscalingapi.h>
+#include <VersionHelpers.h>
 
 #ifdef COMPILING_CORE
 #define CORE_API __declspec(dllexport)
@@ -19,23 +20,34 @@
 
 static void applyDPIScaling() {
 #ifdef _WIN32
-    SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+    // windows 10 exclusive new scaling api
+    auto hUser32 = ::LoadLibraryW(L"user32.dll");
+    if (auto* pfunc = (decltype(&::SetThreadDpiAwarenessContext))::GetProcAddress(
+            hUser32, "SetThreadDpiAwarenessContext")) {
 
-    EnumDisplayMonitors(
-        nullptr, nullptr, [](HMONITOR monitor, HDC hdcMonitor, LPRECT rectMonitor, LPARAM data) -> BOOL CALLBACK {
-            uint32_t dpi_x, dpi_y;
-            GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpi_x, &dpi_y);
-        
-            float dpi_scale_factor = (float)dpi_x / (float)USER_DEFAULT_SCREEN_DPI;
+        pfunc(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+        return;
+    }
 
+    // w8 scaling
+    if (IsWindows8Point1OrGreater()) {
+        auto hShcore = ::LoadLibraryW(L"shcore.dll");
+        if (auto* pfunc = (decltype(&::SetProcessDpiAwareness))::GetProcAddress(
+                hShcore, "SetProcessDpiAwareness")) {
 
-        }, 0);
+            pfunc(PROCESS_PER_MONITOR_DPI_AWARE);
+            return;
+        }
+    }
+
+    // legacy scaling
+    SetProcessDPIAware();
 #endif
 }
 
 int CORE_API core_main(int argc, char** argv) {
     utl::createLogger(true);
-    //applyDPIScaling();
+    applyDPIScaling();
 
     glfwSetErrorCallback([](int errc, const char* desc) { 
         LOG_ERROR("glfw error ({}) : {}", errc, desc); 

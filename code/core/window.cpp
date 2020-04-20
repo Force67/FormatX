@@ -7,12 +7,15 @@
  * in the root of the source tree.
  */
 
+#include "core.h"
 #include "window.h"
 
 #include <fmt/format.h>
 
 #include <glfw/glfw3.h>
 #include <glfw/glfw3native.h>
+
+FXWindow::FXWindow(FXCore& core) : core(core) {}
 
 FXWindow::~FXWindow() {
     if (window)
@@ -75,6 +78,9 @@ void FXWindow::resizeCallback(GLFWwindow* window, i32 w, i32 h) {
     auto* self = reinterpret_cast<FXWindow*>(glfwGetWindowUserPointer(window));
     self->frameSize.x = w;
     self->frameSize.y = h;
+
+    // notify core subsystems
+    self->core.onViewportChange(w, h);
 }
 
 void FXWindow::show() {

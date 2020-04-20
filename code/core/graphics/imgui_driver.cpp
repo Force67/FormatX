@@ -325,6 +325,12 @@ bool ImguiDriver::create(GLRenderer& renderer) {
     glGenBuffers(1, &vertexBuffer);
     glGenBuffers(1, &arrayList);
 
+    auto* font = ctx->IO.Fonts->AddFontFromFileTTF(R"(C:\\Windows\\Fonts\\Verdana.ttf)", 20.0f);
+    if (!font) {
+        LOG_ERROR("Unable to load font");
+        return false;
+    }
+
     // create font atlas
     u8* pixels;
     int width, height;
@@ -339,14 +345,13 @@ bool ImguiDriver::create(GLRenderer& renderer) {
 
     ctx->IO.Fonts->TexID = (ImTextureID)(intptr_t)fontAtlas->nativeHandle();
 
-   // ctx->Style->ScaleAllSizes(2.f);
-   // ImGuiStyle::ScaleAllSizes(2.f);
-
     return true;
 }
 
-void ImguiDriver::resize() {
+void ImguiDriver::resize(i32 x, i32 y) {
 
+    if (!x || !y)
+        return;
 }
 
 void ImguiDriver::poll() {

@@ -14,7 +14,7 @@
 #include "core.h"
 #include "graphics/gl_renderer.h"
 
-FXCore::FXCore(int argc, char** argv) {
+FXCore::FXCore(int argc, char** argv) : window(*this) {
     if (argc > 1) {
         std::vector<std::string> xargv;
 
@@ -59,6 +59,13 @@ bool FXCore::createViewport() {
     }
 
     return false;
+}
+
+void FXCore::onViewportChange(i32 x, i32 y) {
+    renderer->resize(x, y);
+
+    // update ui
+    editor->resize(x, y);
 }
 
 i32 FXCore::exec() {

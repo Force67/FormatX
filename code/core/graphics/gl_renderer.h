@@ -30,6 +30,7 @@ public:
     void shutdown();
     void present();
 
+    void resize(i32, i32);
 public:
     UniquePtr<GLTextureFactory> textureFactory;
     UniquePtr<GLShaderFactory> shaderFactory;

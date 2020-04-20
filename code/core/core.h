@@ -31,6 +31,7 @@ public:
     bool init();
     i32 exec();
 
+    void onViewportChange(i32, i32);
 private:
     bool createViewport();
 

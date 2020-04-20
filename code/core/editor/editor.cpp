@@ -21,12 +21,9 @@ void FXEditor::update() {
     ImGui::NewFrame();
 
     ImGui::BeginMainMenuBar();
-    if (ImGui::BeginMenu("Test Popup")) {
-        if (ImGui::MenuItem("Open Popup")) {
-            ImGui::OpenPopup("Some Popup");
-        }
-        ImGui::EndMenu();
-    }
+    ImGui::BeginMenu("File");
+    ImGui::BeginMenu("Tools");
+    ImGui::BeginMenu("About");
     ImGui::EndMainMenuBar();
 
     static bool show_another_window = false;
@@ -42,8 +39,9 @@ void FXEditor::update() {
     ImguiDriver::render();
 }
 
-void FXEditor::resize() {
-
+void FXEditor::resize(i32 x, i32 y) {
+    // notify driver
+    ImguiDriver::resize(x, y);
 }
 
 void FXEditor::setupKeybinds() {
@@ -78,7 +76,11 @@ void FXEditor::setupKeybinds() {
 void FXEditor::init() {
     setupKeybinds();
 
+        
+
     ImGuiStyle* style = &ImGui::GetStyle();
+    style->ScaleAllSizes(2.f);
+
     ImVec4* colors = style->Colors;
 
     style->WindowRounding =

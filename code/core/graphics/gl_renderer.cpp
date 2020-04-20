@@ -92,6 +92,10 @@ bool GLRenderer::init() {
     return true;
 }
 
+void GLRenderer::resize(i32 x, i32 y) {
+    glViewport(0, 0, static_cast<size_t>(x), static_cast<size_t>(y));
+}
+
 void GLRenderer::shutdown() {
     gladLoaderUnloadGL();
 }

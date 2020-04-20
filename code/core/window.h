@@ -12,9 +12,11 @@
 #include <glm/vec2.hpp>
 
 struct GLFWwindow;
+class FXCore;
 
 class FXWindow {
 public:
+    FXWindow(FXCore&);
     ~FXWindow();
 
     void* getHandle();
@@ -39,4 +41,5 @@ private:
 
     bool requiresSwap = false;
     GLFWwindow* window;
+    FXCore& core;
 };
