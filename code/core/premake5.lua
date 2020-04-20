@@ -12,17 +12,23 @@ project "core"
         "../video_core",
         "../vendor/fmtlib/include",
         "../vendor/glfw/include",
-        "../vendor/imgui"
+        "../vendor/glad/include",
+        "../vendor/imgui",
+        "../vendor/glm/"
     }
 
+    filter "system:windows"
+        links "Shcore"
+
     defines "GLFW_EXPOSE_NATIVE_WIN32"
+    defines "VK_USE_PLATFORM_WIN32_KHR"
 
     links {
-        "video_core",
         "common",
         "fmtlib",
         "glfw",
-        "imgui"
+        "imgui",
+        "glad"
     }
 
     defines "COMPILING_CORE"

@@ -8,8 +8,11 @@
  */
 
 #include "gl_shader.h"
+#include "glad/gl.h"
 
-namespace video_core {
+#include <logger/logger.h>
+
+namespace graphics {
 
 // 410 is our lowest supported GL version for now
 // TODO: auto convert GL version!
@@ -19,7 +22,6 @@ GLShader::~GLShader() {
     if (GL_handle)
         glDeleteShader(GL_handle);
 }
-
 GLShaderProgram::~GLShaderProgram() {
     // unlink all shaders to ensure
     // that the program will be free'd
@@ -27,6 +29,14 @@ GLShaderProgram::~GLShaderProgram() {
 
     if (GL_handle)
         glDeleteProgram(GL_handle);
+}
+
+i32 GLShaderProgram::getAttrib(const char* name) {
+    return glGetAttribLocation(GL_handle, name);
+}
+
+i32 GLShaderProgram::getUniform(const char* name) {
+    return glGetUniformLocation(GL_handle, name);
 }
 
 void GLShaderProgram::unlinkAllshaders() {
@@ -49,10 +59,10 @@ GLShaderFactory::GLShaderFactory() {}
 
 GLShaderFactory::~GLShaderFactory() {
     for (auto* p : programs)
-        VFree(p);
+        delete p;
 
     for (auto* s : shaders)
-        VFree(s);
+        delete s;
 }
 
 // to native type
@@ -67,7 +77,7 @@ GLuint GLShaderFactory::translateType(ShaderType type) {
     }
 }
 
-Shader* GLShaderFactory::createFromSource(ShaderType type, const char* src) {
+GLShader* GLShaderFactory::createFromSource(ShaderType type, const char* src) {
     auto glType = translateType(type);
     if (glType == GL_INVALID_ENUM)
         return nullptr;
@@ -99,19 +109,19 @@ Shader* GLShaderFactory::createFromSource(ShaderType type, const char* src) {
 
     }
 
-    GLShader* shader = VAlloc<GLShader>();
+    GLShader* shader = new GLShader;
     shader->GL_handle = handle;
 
     shaders.push_back(shader);
     return shader;
 }
 
-ShaderProgram* GLShaderFactory::createProgram(const Shader** shaderList, size_t count) {
+GLShaderProgram* GLShaderFactory::createProgram(const GLShader** shaderList, size_t count) {
     if (!shaderList || !count) return nullptr;
 
     auto handle = glCreateProgram();
 
-    auto* prog = VAlloc<GLShaderProgram>();
+    auto* prog = new GLShaderProgram;
     prog->GL_handle = handle;
 
     for (size_t i = 0; i < count; i++) {
@@ -125,5 +135,15 @@ ShaderProgram* GLShaderFactory::createProgram(const Shader** shaderList, size_t 
 
     programs.push_back(prog);
     return prog;
+}
+
+void GLShaderFactory::deleteShader(GLShader* shader) {
+    auto shaderIt =
+        std::find_if(shaders.begin(), shaders.end(), [&shader](const auto* e) { return e == shader; });
+
+    if (shaderIt != shaders.end()) {
+        delete *shaderIt;
+        shaders.erase(shaderIt);
+    }
 }
 }

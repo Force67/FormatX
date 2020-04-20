@@ -12,9 +12,7 @@
 #endif
 
 #include "core.h"
-#include "video_core.h"
-
-constexpr video_core::RenderApi BACKEND_TYPE = video_core::RenderApi::opengl;
+#include "graphics/gl_renderer.h"
 
 FXCore::FXCore(int argc, char** argv) {
     if (argc > 1) {
@@ -41,30 +39,23 @@ bool FXCore::init() {
     if (!editor->create(*renderer))
         __debugbreak();
 
+    editor->init();
+
     return true;
 }
 
 bool FXCore::createViewport() {
-    auto apiType = BACKEND_TYPE;
+    if (window.create(true)) {
 
-    if (window.create(apiType)) {
-
-        video_core::RenderInstanceDesc desc{};
-        desc.flags = video_core::enable_validation;
-        desc.appName = "FormatX";
-        desc.apiType = apiType;
-
-        renderer = video_core::createRenderer(window, desc);
-        if (!renderer) {
-            LOG_ERROR("Failed to create renderer. Error code: {}", static_cast<i32>(apiType));
+        renderer = std::make_unique<graphics::GLRenderer>(window);
+        if (!renderer->init()) {
+            LOG_ERROR("Failed to create renderer");
             return false;
         }
 
-        if (renderer->init()) {
-            LOG_INFO("Render init success");
-            window.show();
-            return true;
-        }
+        LOG_INFO("Renderer OK");
+        window.show();
+        return true;
     }
 
     return false;
@@ -77,6 +68,9 @@ i32 FXCore::exec() {
     
         editor->update();
         renderer->present();
+
+        // yield
+        Sleep(0);
     }
     return 0;
 }

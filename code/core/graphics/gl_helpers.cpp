@@ -8,8 +8,9 @@
  */
 
 #include "gl_helpers.h"
+#include "glad/gl.h"
 
-namespace video_core::helpers {
+namespace graphics::helpers {
 
 void GLFramebuffer::create() {
     glGenFramebuffers(1, &GL_handle);

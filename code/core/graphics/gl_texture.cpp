@@ -8,8 +8,9 @@
  */
 
 #include "gl_texture.h"
+#include "glad/gl.h"
 
-namespace video_core {
+namespace graphics {
 
 GLTexture::~GLTexture() {
     if (GL_handle)
@@ -31,13 +32,13 @@ GLTextureFactory::~GLTextureFactory() {
     // ensure that all texture memory
     // is released
     for (auto* tex : textures) {
-        VFree(tex);
+        delete tex;
     }
 }
 
-Texture* GLTextureFactory::createTexture(u16 width, u16 height, u8* pixels) {
+GLTexture* GLTextureFactory::createTexture(u16 width, u16 height, u8* pixels) {
 
-    GLTexture* tex = VAlloc<GLTexture>();
+    GLTexture* tex = new GLTexture;
     tex->width = width;
     tex->height = height;
 
@@ -59,13 +60,13 @@ Texture* GLTextureFactory::createTexture(u16 width, u16 height, u8* pixels) {
     return tex;
 }
 
-void GLTextureFactory::destroyTexture(Texture* tex) {
+void GLTextureFactory::destroyTexture(GLTexture* tex) {
     auto texIt = std::find_if(textures.begin(), textures.end(), [&tex](const auto* e) { 
         return e == tex; 
     });
 
     if (texIt != textures.end()) {
-        VFree((*texIt));
+        delete *texIt;
         textures.erase(texIt);
     }
 }

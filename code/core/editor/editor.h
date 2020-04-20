@@ -8,15 +8,22 @@
  * in the root of the source tree.
  */
 
+#include <imgui.h>
+
 #include "window.h"
-#include "imgui_driver.h"
+#include "graphics/imgui_driver.h"
 
 namespace ui {
 
-class FXEditor final : public ImguiDriver {
+class FXEditor final : public graphics::ImguiDriver {
 public:
     explicit FXEditor(FXWindow&);
 
+    void init();
     void update();
+
+    void resize();
+private:
+    static void setupKeybinds();
 };
 }

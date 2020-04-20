@@ -7,14 +7,35 @@
  * in the root of the source tree.
  */
 
-#include "gl_renderer.h"
+#include <array>
 
+#include "gl_renderer.h"
 #include "gl_texture.h"
 #include "gl_shader.h"
 
-namespace video_core {
+#include "window.h"
 
-GLRenderer::GLRenderer(renderWindow& window) : renderInterface(window) {}
+namespace graphics {
+
+static std::array<GLfloat, 3 * 2> MakeOrthographicMatrix(float width, float height) {
+    std::array<GLfloat, 3 * 2> matrix; // Laid out in column-major order
+
+    // clang-format off
+    matrix[0] = 2.f / width; matrix[2] =  0.f;          matrix[4] = -1.f;
+    matrix[1] = 0.f;         matrix[3] = -2.f / height; matrix[5] =  1.f;
+    // Last matrix row is implicitly assumed to be [0, 0, 1].
+    // clang-format on
+
+    return matrix;
+}
+
+GLRenderer::GLRenderer(FXWindow& window) : window(window) {
+    textureFactory = std::make_unique<GLTextureFactory>();
+    shaderFactory = std::make_unique<GLShaderFactory>();
+}
+
+GLRenderer::~GLRenderer() {
+}
 
 void GLRenderer::debugCallback(GLenum, GLenum, GLuint, GLenum severity, GLsizei, const GLchar* msg,
     const void*) {
@@ -25,8 +46,11 @@ void GLRenderer::debugCallback(GLenum, GLenum, GLuint, GLenum severity, GLsizei,
     case GL_DEBUG_SEVERITY_MEDIUM:
         LOG_WARNING("GL Warning : {}", msg);
         break;
-    default:
+    case GL_DEBUG_SEVERITY_LOW:
         LOG_INFO("GL Info : {}", msg);
+        break;
+    default:
+        // TODO: maybe debug log verbose stuff?
         break;
     }
 }
@@ -60,29 +84,30 @@ bool GLRenderer::init() {
 
     logDeviceInfo();
 
-    // init viewport
-    const auto& config = window.getConfig();
-    glViewport(0, 0, config.width, config.height);
+    auto& info = window.size();
+    glViewport(0, 0, info.x, info.y);
 
     //presentFbo.create();
 
-    texFactory = VAlloc<GLTextureFactory>();
-    shaderFactory = VAlloc<GLShaderFactory>();
     return true;
 }
 
 void GLRenderer::shutdown() {
-    if (texFactory)
-        VFree(texFactory);
-    if (shaderFactory)
-        VFree(shaderFactory);
-
     gladLoaderUnloadGL();
 }
 
 void GLRenderer::present() {
+    return;
+
     // clear the screen black
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // screen space projection
+    const auto& size = window.size();
+    auto matrix = MakeOrthographicMatrix(
+        static_cast<float>(size.x),
+        static_cast<float>(size.y));
+
     glClear(GL_COLOR_BUFFER_BIT);
 
    // glBindFramebuffer(GL_READ_FRAMEBUFFER, presentFbo.handle());

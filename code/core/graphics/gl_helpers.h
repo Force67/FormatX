@@ -8,10 +8,9 @@
  * in the root of the source tree.
  */
 
-#include "video_core.h"
-#include "glad/gl.h"
+#include <base.h>
 
-namespace video_core::helpers {
+namespace graphics::helpers {
 
 class GLFramebuffer {
 public:

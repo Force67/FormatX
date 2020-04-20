@@ -80,7 +80,6 @@ workspace "FormatX"
     group "app"
     include "./app"
 	include "./core"
-    include "./video_core"
 	include "./common"
 
     group "vendor"

@@ -8,17 +8,18 @@
  * in the root of the source tree.
  */
 
-#include "video_core.h"
+#include <base.h>
+#include <glm/vec2.hpp>
 
 struct GLFWwindow;
 
-class FXWindow final : public video_core::renderWindow {
+class FXWindow {
 public:
     ~FXWindow();
 
-    void* getHandle() override;
+    void* getHandle();
 
-    bool create(video_core::RenderApi);
+    bool create(bool glInit);
     bool update();
 
     void show();
@@ -27,8 +28,14 @@ public:
         return window;
     }
 
+    inline glm::i32vec2& size() {
+        return frameSize;
+    }
+
 private:
-    void setPlatformDefaultRes();
+    glm::i32vec2 frameSize;
+
+    static void resizeCallback(GLFWwindow* window, i32, i32);
 
     bool requiresSwap = false;
     GLFWwindow* window;

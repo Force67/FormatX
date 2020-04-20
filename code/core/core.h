@@ -17,7 +17,11 @@
 #include <core.h>
 
 #include "window.h"
-#include "ui/editor.h"
+#include "editor/editor.h"
+
+namespace graphics {
+class GLRenderer;
+}
 
 class FXCore {
 public:
@@ -31,7 +35,7 @@ private:
     bool createViewport();
 
     FXWindow window;
-    UniquePtr<video_core::renderInterface> renderer;
+    UniquePtr<graphics::GLRenderer> renderer;
     UniquePtr<ui::FXEditor> editor;
 
     std::vector<std::string> argv;
