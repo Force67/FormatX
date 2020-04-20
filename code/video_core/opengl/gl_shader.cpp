@@ -41,6 +41,10 @@ void GLShaderProgram::unlinkAllshaders() {
         glDetachShader(GL_handle, handle);
 }
 
+void GLShaderProgram::use() {
+    glUseProgram(GL_handle);
+}
+
 GLShaderFactory::GLShaderFactory() {}
 
 GLShaderFactory::~GLShaderFactory() {

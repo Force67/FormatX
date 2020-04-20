@@ -17,6 +17,7 @@
 
 namespace video_core {
 class renderInterface;
+class ShaderProgram;
 }
 
 namespace ui {
@@ -37,6 +38,9 @@ private:
 
     ImGuiContext* ctx = nullptr;
     double timestamp = 0.0;
+
+    // transforms
+    video_core::ShaderProgram* imageProgram = nullptr;
 
 protected:
     FXWindow& window;

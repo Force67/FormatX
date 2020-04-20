@@ -16,7 +16,7 @@ GLTexture::~GLTexture() {
         glDeleteTextures(1, &GL_handle);
 }
 
-void* GLTexture::handle() {
+void* GLTexture::nativeHandle() {
     // avoid pointer size warning
     // by static_cast'ing
     return reinterpret_cast<void*>(static_cast<size_t>(GL_handle));

@@ -64,6 +64,8 @@ bool GLRenderer::init() {
     const auto& config = window.getConfig();
     glViewport(0, 0, config.width, config.height);
 
+    //presentFbo.create();
+
     texFactory = VAlloc<GLTextureFactory>();
     shaderFactory = VAlloc<GLShaderFactory>();
     return true;
@@ -79,7 +81,10 @@ void GLRenderer::shutdown() {
 }
 
 void GLRenderer::present() {
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    // clear the screen black
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+   // glBindFramebuffer(GL_READ_FRAMEBUFFER, presentFbo.handle());
 }
 }

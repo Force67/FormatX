@@ -126,7 +126,7 @@ bool ImguiDriver::create(video_core::renderInterface& renderer) {
     // setup style
     ImGui::StyleColorsDark();
 
-    // create font texture
+    // build a texture atlas
     u8* pixels;
     i32 width, height, bytes_per_pixel;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytes_per_pixel);
@@ -155,14 +155,17 @@ bool ImguiDriver::create(video_core::renderInterface& renderer) {
         return false;
     }
 
-    const vc::Shader* imguiShaders[2] = {vertexShader, fragShader};
-    if (!renderer.shaderFactory->createProgram(imguiShaders, 2)) {
+    const vc::Shader* shaders[2] = {vertexShader, fragShader};
+
+    // compile a shader bundle
+    imageProgram = renderer.shaderFactory->createProgram(shaders, 2);
+    if (!imageProgram) {
         LOG_ERROR("Failed to create shader program");
         return false;
     }
-
-    // inital flush
-    // to intiailize render state
+    
+    // flush once to initialize
+    // render state
     render();
 
     return true;
@@ -196,8 +199,21 @@ void ImguiDriver::render() {
         static_cast<float>(1.f / 60.f);
        
     timestamp = time;
-
     ImDrawData* drawData = &ctx->DrawData;
+
+    // translate to visible screen space
+    float L = drawData->DisplayPos.x;
+    float R = drawData->DisplayPos.x + drawData->DisplaySize.x;
+    float T = drawData->DisplayPos.y;
+    float B = drawData->DisplayPos.y + drawData->DisplaySize.y;
+    const float ortho_projection[4][4] = {
+        {2.0f / (R - L), 0.0f, 0.0f, 0.0f},
+        {0.0f, 2.0f / (T - B), 0.0f, 0.0f},
+        {0.0f, 0.0f, -1.0f, 0.0f},
+        {(R + L) / (L - R), (T + B) / (B - T), 0.0f, 1.0f},
+    };
+
+    imageProgram->use();
 
     // we are minimized, ensure that we don't render anything
     // TODO: nuke this check, check within GLFW instead...
@@ -206,8 +222,15 @@ void ImguiDriver::render() {
     if (fbWidth <= 0.f || fbHeight <= 0.f)
         return;
 
+    ImVec2 clip_off = drawData->DisplayPos;
+    ImVec2 clip_scale = drawData->FramebufferScale; 
+
     for (i32 n = 0; n < drawData->CmdListsCount; n++) {
         const ImDrawList* drawList = drawData->CmdLists[n];
+
+        const u32 vertixCount = (uint32_t)drawList->VtxBuffer.size();
+        const u32 indexCount = (uint32_t)drawList->IdxBuffer.size();
+        std::printf("Vertex count %d, index count %d\n", vertixCount, indexCount);
 
         // for each draw command, we check
         for (const ImDrawCmd &cmd : drawList->CmdBuffer) {
@@ -218,7 +241,15 @@ void ImguiDriver::render() {
                     setupRenderstate(drawList);
                 else
                     cmd.UserCallback(drawList, &cmd);
+            } else {
+                ImVec4 clip_rect;
+                clip_rect.x = (cmd.ClipRect.x - clip_off.x) * clip_scale.x;
+                clip_rect.y = (cmd.ClipRect.y - clip_off.y) * clip_scale.y;
+                clip_rect.z = (cmd.ClipRect.z - clip_off.x) * clip_scale.x;
+                clip_rect.w = (cmd.ClipRect.w - clip_off.y) * clip_scale.y;
             }
+
+            std::printf("command id %d\n", (int)cmd.TextureId);
 
             // scissor 
             //const u16 xx = std::max<u16>(cmd.ClipRect.x, 0.f);

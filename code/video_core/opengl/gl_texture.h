@@ -18,7 +18,7 @@ class GLTexture final : public Texture {
 public:
     ~GLTexture();
 
-    void* handle() override;
+    void* nativeHandle() override;
 
 private:
     GLuint GL_handle = 0;

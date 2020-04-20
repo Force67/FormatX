@@ -15,7 +15,8 @@ namespace video_core {
 enum class ShaderType {
     Error,
     Fragment,
-    Vertex
+    Vertex,
+    Pixel
 };
 
 class Shader {
@@ -23,7 +24,8 @@ public:
 };
 
 class ShaderProgram {
-
+public:
+    virtual void use() = 0;
 };
 
 // objects that are not explicitly destroyed

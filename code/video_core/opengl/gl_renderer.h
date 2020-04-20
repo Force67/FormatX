@@ -9,9 +9,16 @@
  */
 
 #include "video_core.h"
-#include "glad/gl.h"
+#include "gl_helpers.h"
 
 namespace video_core {
+
+class GLFramebuffer {
+public:
+
+private:
+    u32 GL_fbo = 0;
+};
 
 class GLRenderer final : public renderInterface {
 public:
@@ -23,6 +30,9 @@ public:
     void present() override;
 
 private:
+    helpers::GLFramebuffer presentFbo;
+    helpers::GLFramebuffer renderFbo;
+
     void logDeviceInfo();
 
     static void debugCallback(GLenum, GLenum, GLuint, GLenum,

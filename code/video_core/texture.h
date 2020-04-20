@@ -15,7 +15,9 @@ namespace video_core {
 // texture base type
 class Texture {
 public:
-    virtual void* handle() = 0;
+    // returns native handle e.g a GLuint for GL
+    // or a ID3D11Texture for Dx11
+    virtual void* nativeHandle() = 0;
 
 public:
     u16 width;

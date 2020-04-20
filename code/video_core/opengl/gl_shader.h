@@ -29,6 +29,8 @@ class GLShaderProgram final : public ShaderProgram {
 public:
     ~GLShaderProgram();
 
+    void use() override;
+
     void unlinkAllshaders();
 
 private:
