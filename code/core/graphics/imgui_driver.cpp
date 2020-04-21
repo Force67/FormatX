@@ -280,7 +280,6 @@ void ImguiDriver::renderDrawData(ImDrawData* drawData) {
 
 bool ImguiDriver::create(GLRenderer& renderer) {
     // create ImGui
-
     ctx = ImGui::CreateContext();
     ctx->IO.BackendRendererName = "ImguiDriver";
     ctx->IO.IniFilename = nullptr;
@@ -365,7 +364,7 @@ void ImguiDriver::poll() {
 
     // HACK
     i32 displayW, displayH;
-    glfwGetFramebufferSize(window.HACK_getWindow(), &displayW, &displayH);
+    glfwGetFramebufferSize(window.getWindowImp(), &displayW, &displayH);
 
     if (config.x > 0 && config.y)
         ctx->IO.DisplayFramebufferScale = ImVec2(static_cast<float>(displayW) / config.x,
@@ -382,7 +381,7 @@ void ImguiDriver::poll() {
 void ImguiDriver::render() {
     ImGui::Render();
     int display_w, display_h;
-    glfwGetFramebufferSize(window.HACK_getWindow(), &display_w, &display_h);
+    glfwGetFramebufferSize(window.getWindowImp(), &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);

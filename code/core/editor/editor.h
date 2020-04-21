@@ -24,6 +24,12 @@ public:
 
     void resize(i32, i32);
 private:
+    bool showsStats = true;
+    bool dockFullscreen = true;
+
+    void drawStatsOverlay();
+    void drawLogtab();
+
     static void setupKeybinds();
 };
 }

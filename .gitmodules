@@ -10,6 +10,7 @@
 [submodule "code/vendor/imgui"]
 	path = code/vendor/imgui
 	url = https://github.com/ocornut/imgui.git
+	branch = docking
 [submodule "code/vendor/glfw"]
 	path = code/vendor/glfw
 	url = https://github.com/glfw/glfw.git

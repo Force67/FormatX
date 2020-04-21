@@ -77,7 +77,7 @@ i32 FXCore::exec() {
         renderer->present();
 
         // yield
-        Sleep(0);
+        Sleep(1);
     }
     return 0;
 }

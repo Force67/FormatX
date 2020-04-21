@@ -26,7 +26,7 @@ public:
 
     void show();
 
-    inline GLFWwindow* HACK_getWindow() {
+    inline GLFWwindow* getWindowImp() {
         return window;
     }
 
@@ -36,10 +36,13 @@ public:
 
     static float getHDPIScale();
 
+    void bindInput();
 private:
     glm::i32vec2 frameSize;
+    bool mouseJustPressed[5] = {false, false, false, false, false};
 
-    static void resizeCallback(GLFWwindow* window, i32, i32);
+private:
+    static void resizeCallback(GLFWwindow*, i32, i32);
 
     bool requiresSwap = false;
     GLFWwindow* window;

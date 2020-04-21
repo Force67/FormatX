@@ -64,6 +64,7 @@ project "imgui"
         "./imgui/imgui_draw.cpp",
         "./imgui/imgui_internal.h",
         "./imgui/imgui_widgets.cpp",
+        "./imgui/imgui_demo.cpp"
     }
 
 project "glad"
