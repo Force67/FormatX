@@ -12,7 +12,8 @@ project "common"
     includedirs
     {
         ".",
-		"../vendor/fmtlib/include",
+        "../vendor/fmtlib/include",
+        "../vendor/yaml-cpp/include",
     }
 
     files

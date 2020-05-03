@@ -1,52 +1,50 @@
 
-// Copyright (c) Nomad Group 2019
+/*
+ * UTL : The universal utility library
+ *
+ * Copyright 2019-2020 Force67.
+ * For information regarding licensing see LICENSE
+ * in the root of the source tree.
+ */
 
-#include <Shlwapi.h>
+#include <algorithm>
+
+#include "path.h"
+
+#ifdef _WIN32
 #include <Windows.h>
-#include <utl/path.h>
-#pragma comment(lib, "Shlwapi.lib")
+#include <shlobj.h> // for SHGetFolderPath
+#endif
+
+#include <base.h>
 
 namespace utl {
-/*
- * These functions are REQUIRED to return a canonicalized path!
- * CEF requirement! Otherwise these will result in weird path errors
- */
-std::wstring make_abs_path(const std::wstring& rel_to, void* handle) {
-    static wchar_t executable_path[MAX_PATH] = {'\0'};
 
-    if (executable_path[0] == '\0' || handle) {
-        wchar_t buf[MAX_PATH];
-        GetModuleFileNameW((HMODULE)handle, buf, MAX_PATH);
-        _wsplitpath(buf, &executable_path[0], &executable_path[_MAX_DRIVE - 1], nullptr, nullptr);
+std::string get_home_dir();
+
+std::string make_app_path(app_path pathType, optional_path relative) {
+    // clearly a bug
+    if (pathType == app_path::count)
+        BUGCHECK();
+
+    static std::string s_defaultPaths[static_cast<int>(app_path::count)];
+    auto& newPath = s_defaultPaths[static_cast<int>(pathType)];
+
+    if (newPath.empty()) {
+        switch (pathType) { 
+            case app_path::home: {
+                newPath = get_home_dir() + PATH_SEP PRJ_COMPANY PATH_SEP PRJ_NAME PATH_SEP;
+            break;
+            }
+            case app_path::self:
+            default:
+                return make_abs_path(relative);
+        }
+
+        if (!exists(newPath))
+            make_dir(newPath);
     }
 
-    wchar_t buf[MAX_PATH];
-    lstrcpyW(buf, executable_path);
-    lstrcatW(buf, rel_to.c_str());
-
-    wchar_t final_buf[MAX_PATH] = {'\0'};
-    PathCanonicalizeW(final_buf, buf);
-
-    return final_buf;
+    return !relative ? newPath : newPath + *relative;
 }
-
-std::string make_abs_path(const std::string& rel_to, void* handle) {
-    static char executable_path[MAX_PATH] = {'\0'};
-
-    if (executable_path[0] == '\0' || handle) {
-        char buf[MAX_PATH];
-        GetModuleFileNameA((HMODULE)handle, buf, MAX_PATH);
-        _splitpath(buf, &executable_path[0], &executable_path[_MAX_DRIVE - 1], nullptr, nullptr);
-    }
-
-    char buf[MAX_PATH];
-    strcpy(buf, executable_path);
-    strcat(buf, rel_to.c_str());
-
-    char final_buf[MAX_PATH] = {'\0'};
-    PathCanonicalizeA(final_buf, buf);
-
-    return final_buf;
-}
-
 } // namespace utl

@@ -290,30 +290,20 @@ bool ImguiDriver::create(GLRenderer& renderer) {
     ctx->IO.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
     ctx->IO.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
 
-    auto* fragShader = renderer.shaderFactory->createFromSource(
-        ShaderType::Fragment, FRAG_SHADER);
+    graphics::GLShaderBuilder<2> builder(renderer);
+    builder.add(graphics::ShaderType::Fragment, FRAG_SHADER);
+    builder.add(graphics::ShaderType::Vertex, VERTEX_SHADER);
 
-    auto* verShader = renderer.shaderFactory->createFromSource(
-        ShaderType::Vertex, VERTEX_SHADER);
-
-    if (!fragShader || !verShader) {
+    if (!builder.good()) {
         LOG_ERROR("Failed to compile imgui shaders");
         return false;
     }
 
-    const GLShader* shaders[2] = {fragShader,verShader};
-    imageProgram = renderer.shaderFactory->createProgram(shaders, 2);
+    imageProgram = builder.finish();
     if (!imageProgram) {
         LOG_ERROR("Failed to link shaders");
         return false;
     }
-
-    // force unlink, else shader memory wont be released
-    imageProgram->unlinkAllshaders();
-
-    // release shaders
-    renderer.shaderFactory->deleteShader(fragShader);
-    renderer.shaderFactory->deleteShader(verShader);
 
     g_AttribLocationTex = imageProgram->getUniform("Texture");
     g_AttribLocationProjMtx = imageProgram->getUniform("ProjMtx");

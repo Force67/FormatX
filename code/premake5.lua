@@ -33,9 +33,11 @@ workspace "FormatX"
     symbols "On"
     characterset "Unicode"
     
+    -- setup project information
     git_info()
     defines { ("PRJ_NAME=\"%{wks.name}\""), 
               ("PRJ_NAME_WIDE=L\"%{wks.name}\""),
+              ('PRJ_COMPANY="DevForce"'),
               ('GIT_BRANCH="' .. git_branch .. '"'),
               ('GIT_COMMIT="' .. git_commit .. '"'),
               ('PRJ_CANARY=') .. (git_branch == "master" and 0 or 1) }

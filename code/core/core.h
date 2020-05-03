@@ -10,14 +10,17 @@
 
 #include <vector>
 #include <base.h>
-#include <plugin_traits.h>
+#include <config.h>
+#include <plugintraits.h>
 #include <utl/logger/logger.h>
 
 #include <base.h>
 #include <core.h>
 
 #include "window.h"
+
 #include "editor/editor.h"
+#include "scene/scene.h"
 
 namespace graphics {
 class GLRenderer;
@@ -33,11 +36,17 @@ public:
 
     void onViewportChange(i32, i32);
 private:
-    bool createViewport();
+    void step();
+    void shutdown();
+
+    double updateTime;
+    double lagTime;
 
     FXWindow window;
+
     UniquePtr<graphics::GLRenderer> renderer;
-    UniquePtr<ui::FXEditor> editor;
+    UniquePtr<editor::FXEditor> editor;
+    UniquePtr<scene::Scene> scene;
 
     std::vector<std::string> argv;
     std::vector<pluginLoader*> plugins;

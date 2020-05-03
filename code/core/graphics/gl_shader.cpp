@@ -146,4 +146,5 @@ void GLShaderFactory::deleteShader(GLShader* shader) {
         shaders.erase(shaderIt);
     }
 }
+
 }

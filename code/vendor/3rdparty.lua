@@ -132,3 +132,73 @@ project "glfw"
         
             }
     filter{}
+
+project "assimp"
+    language "C++"
+    kind "StaticLib"
+
+    defines
+    {
+        "ASSIMP_BUILD_NO_IFC_IMPORTER",
+        "ASSIMP_BUILD_NO_GLTF_IMPORTER",
+        "ASSIMP_BUILD_NO_OPENGEX_IMPORTER",
+        "ASSIMP_BUILD_NO_C4D_IMPORTER",
+    }
+    
+    includedirs
+    {
+        "assimp/include",
+        "assimp/code",
+        "_ship/assimp",
+        "_ship",
+
+        -- thirdparty
+        "./assimp",
+        "assimp/contrib",
+        "assimp/contrib/zlib",
+        "assimp/contrib/zlib/contrib/minizip",
+        "assimp/contrib/irrXML",
+    }
+    
+    files
+    {   
+        "assimp/include/**.h",
+        "assimp/code/**.cpp",
+        "assimp/code/**.h",
+        "_ship/assimp/config.h",
+
+        -- thirdparty
+        "assimp/contrib/zlib/*.h",
+        "assimp/contrib/zlib/*.c",
+        "assimp/contrib/zlib/contrib/minizip/*.c",
+        "assimp/contrib/zlib/contrib/minizip/*.h",
+
+        "assimp/contrib/irrXML/*.h",
+        "assimp/contrib/irrXML/*.cpp",
+
+        "assimp/contrib/utf8cpp/source/utf8/**.h",
+    }
+
+    removefiles
+    {
+        "assimp/code/Importer/StepFile/**",
+        "assimp/code/C4D/**",
+        "assimp/code/glTF/**",
+        "assimp/code/glTF2/**"
+    }
+    
+project "yaml-cpp"
+    language "C++"
+    kind "StaticLib"
+    
+    includedirs
+    {
+        "yaml-cpp/include",
+        "yaml-cpp/src"
+    }
+    
+    files
+    {   
+        "yaml-cpp/src/**.cpp",
+        "yaml-cpp/include/**.h",
+    }

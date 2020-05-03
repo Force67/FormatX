@@ -46,7 +46,10 @@ static void applyDPIScaling() {
 }
 
 int CORE_API core_main(int argc, char** argv) {
+    // logger with own console
     utl::createLogger(true);
+    config::load();
+
     applyDPIScaling();
 
     glfwSetErrorCallback([](int errc, const char* desc) { 

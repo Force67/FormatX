@@ -10,9 +10,12 @@
 #include <glfw/glfw3.h>
 #include "editor.h"
 
-namespace ui {
+#include "imgui_internal.h"
+
+namespace editor {
 
 FXEditor::FXEditor(FXWindow& window) : ImguiDriver(window) {
+    renderView = std::make_unique<SceneView>();
 }
 
 void FXEditor::drawStatsOverlay() {
@@ -22,21 +25,56 @@ void FXEditor::drawStatsOverlay() {
     ImGui::SetNextWindowBgAlpha(0.35f); // transparent
     ImGui::Begin("window_stats", nullptr,
                  ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration |
-                     ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings |
-                     ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
-    ImGui::Text("Stats Text...");
+                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings |
+                 ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | 
+                 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNavFocus);
+
+    ImGui::Text("Render Stats");
     ImGui::Separator();
-    ImGui::Text("Drawcalls/Sec %.1f\nFPS %.1f", 1000.f, io.Framerate);
+
+    const float fps = io.Framerate;
+
+    // MAYBE TODO: color gradient?
+    ImVec4 col;
+    if (fps < 60.f)
+        col = {0.921f, 0.603f, 0.f, 1.f};
+    else if (fps < 30.f)
+        col = {1.f, 0.019f, 0.133f, 1.f};
+    else
+        col = {0.133f, 0.921f, 0.f, 1.f};
+
+    ImGui::TextColored(col, "Frame time %.2f\nFPS %.1f", 1000.f / fps, fps);
     ImGui::End();
 }
 
 void FXEditor::drawLogtab() {
-    ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
-    ImGui::Begin("FormatX: Log", nullptr);
+    ImGui::SetNextWindowSize(ImVec2(500, 200), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Log", nullptr);
     if (ImGui::SmallButton("[Debug] Add 5 entries")) {
         
     }
     ImGui::End();
+}
+
+void FXEditor::applyDefaultLayout(ImGuiID dockId) {
+    //__debugbreak();
+    //ImGui::DockSpace(dockId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+
+    // setup root node
+    ImGui::DockBuilderRemoveNode(dockId);
+    ImGui::DockBuilderAddNode(dockId);
+
+    // dockspace tracker
+    ImGuiID mainId = dockId;
+
+    ImGuiID leftSlot =
+        ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Up, 0.20f, nullptr, &mainId);
+    ImGuiID downSlotId =
+        ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Down, 0.20f, nullptr, &mainId);
+
+    ImGui::DockBuilderDockWindow("Scene View", leftSlot);
+    ImGui::DockBuilderDockWindow("Log", downSlotId);
+    ImGui::DockBuilderFinish(dockId);
 }
 
 void FXEditor::update() {
@@ -76,9 +114,14 @@ void FXEditor::update() {
     // Dockspace
     ImGuiIO& io = ImGui::GetIO();
     if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
-        ImGuiID dockspace_id = ImGui::GetID("RootDockspace");
-        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), opt_flags);
-    } else {
+        ImGuiID dockId = ImGui::GetID("RootDockspace");
+
+        if (!ImGui::DockBuilderGetNode(dockId))
+            applyDefaultLayout(dockId);
+
+        ImGui::DockSpace(dockId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+    }
+    else {
         // ShowDockingDisabledMessage();
     }
 
@@ -110,15 +153,17 @@ void FXEditor::update() {
     ImGui::TextColored({0.615f, 0.631f, 0.705f, 1.f}, GIT_BRANCH "@" GIT_COMMIT);
     ImGui::EndMainMenuBar();
 
-    static bool open = true;
-    ImGui::ShowDemoWindow(&open);
-
-    if (showsStats)
+    //static bool open = true;
+    //ImGui::ShowDemoWindow(&open);
+ 
+    if (showStats)
         drawStatsOverlay();
 
     drawLogtab();
 
     ImGui::End();
+
+    renderView->update();
 
     ImGui::Render();
     ImguiDriver::render();

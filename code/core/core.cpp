@@ -13,6 +13,9 @@
 
 #include "core.h"
 #include "graphics/gl_renderer.h"
+#include "glfw/glfw3.h"
+
+static config::opt<f64> STEP_TIME{"core.step_time", "core step time (MS)", 16.0};
 
 FXCore::FXCore(int argc, char** argv) : window(*this) {
     if (argc > 1) {
@@ -28,37 +31,37 @@ FXCore::FXCore(int argc, char** argv) : window(*this) {
 FXCore::~FXCore() {
     if (renderer)
         renderer->shutdown();
+
+    config::save();
 }
 
 bool FXCore::init() {
-    if (!createViewport()) {
+
+    if (!window.create(true))
+        return false;
+
+    renderer = std::make_unique<graphics::GLRenderer>(window);
+    if (!renderer->init()) {
+        LOG_ERROR("Failed to create renderer");
         return false;
     }
 
-    editor = std::make_unique<ui::FXEditor>(window);
-    if (!editor->create(*renderer))
-        __debugbreak();
-
-    editor->init();
-
-    return true;
-}
-
-bool FXCore::createViewport() {
-    if (window.create(true)) {
-
-        renderer = std::make_unique<graphics::GLRenderer>(window);
-        if (!renderer->init()) {
-            LOG_ERROR("Failed to create renderer");
-            return false;
-        }
-
-        LOG_INFO("Renderer OK");
-        window.show();
-        return true;
+    editor = std::make_unique<editor::FXEditor>(window);
+    if (!editor->create(*renderer)) {
+        LOG_ERROR("Failed to create editor");
+        return false;
     }
 
-    return false;
+    scene = std::make_unique<scene::Scene>();
+    if (!scene->create(*renderer)) {
+        LOG_ERROR("Failed to create scene");
+        return false;
+    }
+
+    editor->init();
+    __debugbreak();
+    window.show();
+    return true;
 }
 
 void FXCore::onViewportChange(i32 x, i32 y) {
@@ -68,16 +71,42 @@ void FXCore::onViewportChange(i32 x, i32 y) {
     editor->resize(x, y);
 }
 
+void FXCore::shutdown() {
+}
+
+void FXCore::step() {
+    std::puts("stepping");
+}
+
 i32 FXCore::exec() {
+    updateTime = glfwGetTime();
+
     while (true) {
-        // exit requested
-        if (!window.update()) break;
+        // update core timer
+        double current = glfwGetTime();
+        double elapsed = current - updateTime;
+
+        updateTime = current;
+        lagTime += elapsed;
+
+        // always update window to avoid ghosting
+        if (!window.update()) {
+            shutdown();
+            break;
+        }
+
+        // issue steps while we catch up
+        while (lagTime >= STEP_TIME) {
+            step();
+            lagTime -= STEP_TIME;
+        }
     
+        scene->draw();
         editor->update();
         renderer->present();
 
         // yield
-        Sleep(1);
+        //Sleep(1);
     }
     return 0;
 }

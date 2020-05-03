@@ -9,12 +9,16 @@ project "core"
         ".",
         "../common",
         "../common/utl",
-        "../video_core",
         "../vendor/fmtlib/include",
         "../vendor/glfw/include",
         "../vendor/glad/include",
         "../vendor/imgui",
-        "../vendor/glm/"
+        "../vendor/glm/",
+        "../vendor/assimp/include",
+        "../vendor/yaml-cpp/include",
+
+        -- library config overrides
+        "../vendor/_ship"
     }
 
     filter "system:windows"
@@ -28,7 +32,9 @@ project "core"
         "fmtlib",
         "glfw",
         "imgui",
-        "glad"
+        "glad",
+        "assimp",
+        "yaml-cpp"
     }
 
     defines "COMPILING_CORE"

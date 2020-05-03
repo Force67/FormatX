@@ -5,7 +5,7 @@
 
 bin/
 build/
-code/app/qtgen
+!code/vendor/_ship
 .vscode
 
 # Projects

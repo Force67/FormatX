@@ -12,18 +12,17 @@
 
 namespace graphics::helpers {
 
-class GLFramebuffer {
+// you have to render onto the render target
+// in order to display in sceneview
+class GLRenderTarget {
 public:
-    GLFramebuffer() = default;
+    GLRenderTarget();
+    ~GLRenderTarget();
 
-    void create();
-
-    u32 handle() {
-        return GL_handle;
-    }
+    void use();
 
 private:
-    u32 GL_handle = 0;
+    u32 GL_handle;
 };
 
 }

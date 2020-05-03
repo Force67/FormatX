@@ -17,3 +17,9 @@
 [submodule "code/vendor/glm"]
 	path = code/vendor/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "code/vendor/assimp"]
+	path = code/vendor/assimp
+	url = https://github.com/assimp/assimp
+[submodule "code/vendor/yaml-cpp"]
+	path = code/vendor/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp

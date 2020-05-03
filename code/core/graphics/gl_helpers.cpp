@@ -12,8 +12,16 @@
 
 namespace graphics::helpers {
 
-void GLFramebuffer::create() {
+GLRenderTarget::GLRenderTarget() {
     glGenFramebuffers(1, &GL_handle);
+}
+
+GLRenderTarget::~GLRenderTarget() {
+    glDeleteFramebuffers(1, &GL_handle);
+}
+
+void GLRenderTarget::use() {
     glBindFramebuffer(GL_FRAMEBUFFER, GL_handle);
+
 }
 }

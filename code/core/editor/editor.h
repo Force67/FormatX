@@ -13,7 +13,9 @@
 #include "window.h"
 #include "graphics/imgui_driver.h"
 
-namespace ui {
+#include "sceneview.h"
+
+namespace editor {
 
 class FXEditor final : public graphics::ImguiDriver {
 public:
@@ -24,12 +26,16 @@ public:
 
     void resize(i32, i32);
 private:
-    bool showsStats = true;
-    bool dockFullscreen = true;
-
+    void applyDefaultLayout(ImGuiID);
     void drawStatsOverlay();
     void drawLogtab();
 
     static void setupKeybinds();
+
+private:
+    bool showStats = true;
+    bool dockFullscreen = true;
+
+    UniquePtr<SceneView> renderView;
 };
 }
