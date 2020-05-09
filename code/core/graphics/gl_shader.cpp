@@ -12,7 +12,7 @@
 
 #include <logger/logger.h>
 
-namespace graphics {
+namespace gfx {
 
 // 410 is our lowest supported GL version for now
 // TODO: auto convert GL version!

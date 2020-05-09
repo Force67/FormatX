@@ -12,7 +12,7 @@
 #include <base.h>
 #include <glm/ext/matrix_transform.hpp>
 
-namespace graphics {
+namespace gfx {
 class GLRenderer;
 class GLShaderProgram;
 } // namespace graphics
@@ -30,11 +30,11 @@ public:
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = DEFAULT_YAW, float pitch = 0.f);
 
-    void update(graphics::GLShaderProgram*);
+    void update(gfx::GLShaderProgram*);
 
     glm::mat4 viewMatrix();
 
-    void init(graphics::GLShaderProgram*);
+    void init(gfx::GLShaderProgram*);
 private:
 
     glm::vec3 pos;

@@ -11,9 +11,10 @@
 #include <string>
 #include "camera.h"
 
-namespace graphics {
+namespace gfx {
 class GLRenderer;
 class GLShaderProgram;
+class GLRenderTexture;
 }
 
 namespace scene {
@@ -21,12 +22,15 @@ namespace scene {
 class Scene {
 public:
     Scene();
+    ~Scene();
 
-    bool create(graphics::GLRenderer&);
-    void draw();
+    bool create(gfx::GLRenderer&);
 
+    void draw(gfx::GLRenderTexture&);
 private:
     Camera cam;
-    graphics::GLShaderProgram* projProgram;
+    gfx::GLShaderProgram* projProgram;
 };
+
+Scene* ActiveScene();
 } // namespace scene

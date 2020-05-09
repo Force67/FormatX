@@ -15,7 +15,7 @@ class FXWindow;
 struct ImGuiContext;
 struct ImDrawData;
 
-namespace graphics {
+namespace gfx {
 
 class GLRenderer;
 class GLShaderProgram;
@@ -40,9 +40,9 @@ private:
     void renderDrawData(ImDrawData*);
     void setupRenderstate(ImDrawData*, i32, i32, u32);
 
-    ImGuiContext* ctx = nullptr;
     double timestamp = 0.0;
 
+    // TODO: clean this up
     u32 vertexBuffer = 0, arrayList = 0;
     i32    g_AttribLocationTex = 0, g_AttribLocationProjMtx = 0; // Uniforms location
     i32 g_AttribLocationVtxPos = 0, g_AttribLocationVtxUV = 0,
@@ -53,5 +53,6 @@ private:
 
 protected:
     FXWindow& window;
+    ImGuiContext* ctx = nullptr;
 };
 }

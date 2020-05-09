@@ -23,7 +23,7 @@
 
 #include <glm/glm.hpp>
 
-namespace graphics {
+namespace gfx {
 
 constexpr char FRAG_SHADER[] = R"(
     in vec2 Frag_UV;
@@ -229,7 +229,9 @@ void ImguiDriver::renderDrawData(ImDrawData* drawData) {
                                 .w); // Support for GL 4.5 rarely used glClipControl(GL_UPPER_LEFT)
 
                     // Bind texture, Draw
-                    glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
+                    u32 glTex = reinterpret_cast<gfx::GLTexture*>(pcmd->TextureId)->GL_handle;
+
+                    glBindTexture(GL_TEXTURE_2D, glTex);
                     glDrawElementsBaseVertex(GL_TRIANGLES, (GLsizei)pcmd->ElemCount,
                                              sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT
                                                                     : GL_UNSIGNED_INT,
@@ -290,9 +292,9 @@ bool ImguiDriver::create(GLRenderer& renderer) {
     ctx->IO.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
     ctx->IO.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
 
-    graphics::GLShaderBuilder<2> builder(renderer);
-    builder.add(graphics::ShaderType::Fragment, FRAG_SHADER);
-    builder.add(graphics::ShaderType::Vertex, VERTEX_SHADER);
+    gfx::GLShaderBuilder<2> builder(renderer);
+    builder.add(gfx::ShaderType::Fragment, FRAG_SHADER);
+    builder.add(gfx::ShaderType::Vertex, VERTEX_SHADER);
 
     if (!builder.good()) {
         LOG_ERROR("Failed to compile imgui shaders");
@@ -329,16 +331,20 @@ bool ImguiDriver::create(GLRenderer& renderer) {
     u8* pixels;
     int width, height;
     ctx->IO.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-    auto* fontAtlas = renderer.textureFactory->createTexture(static_cast<u16>(width),
-                                                             static_cast<u16>(height), pixels);
+
+    TextureDesc desc;
+    desc.colorFormat = ColorFormat::RGBA;
+    desc.height = static_cast<u16>(width);
+    desc.width = static_cast<u16>(width);
+
+    auto* fontAtlas = renderer.textureFactory->createTexture(desc, pixels);
 
     if (!fontAtlas) {
         LOG_ERROR("Failed to create font altas");
         return false;
     }
 
-    ctx->IO.Fonts->TexID = (ImTextureID)(intptr_t)fontAtlas->nativeHandle();
-
+    ctx->IO.Fonts->TexID = static_cast<void*>(fontAtlas);
     return true;
 }
 

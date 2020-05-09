@@ -129,14 +129,14 @@ void createLogger(bool createConsole) {
             freopen_s(&file, "CONIN$", "r", stdin);
         }
 
-        addLogSink(std::make_unique<consoleSink>());
+        addLogSink(new consoleSink());
     }
 
     // attach the sinks to the log system
-    addLogSink(std::make_unique<fileSink>(PRJ_NAME_WIDE L".log"));
+    addLogSink(new fileSink(PRJ_NAME_WIDE L".log"));
 
     if (IsDebuggerPresent())
-        addLogSink(std::make_unique<debugSink>());
+        addLogSink(new debugSink());
 
     // attempt to properly close log file in case of a crash
     std::atexit([]() {

@@ -28,12 +28,12 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) :
     //update();
 }
 
-void Camera::init(graphics::GLShaderProgram *prog) {
+void Camera::init(gfx::GLShaderProgram *prog) {
     projHandle = prog->getUniform("projection");
     viewHandle = prog->getUniform("view");
 }
 
-void Camera::update(graphics::GLShaderProgram* prog) {
+void Camera::update(gfx::GLShaderProgram* prog) {
     // Calculate the new Front vector
     glm::vec3 front;
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));

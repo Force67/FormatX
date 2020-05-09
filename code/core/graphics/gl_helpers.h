@@ -9,20 +9,49 @@
  */
 
 #include <base.h>
+#include <glm/glm.hpp>
 
-namespace graphics::helpers {
+#include "gl_texture.h"
 
-// you have to render onto the render target
-// in order to display in sceneview
-class GLRenderTarget {
+namespace gfx {
+
+class GLRenderer;
+
+struct GLRenderTarget {
+    void create();
+    void release();
+
+    u32 handle;
+};
+
+class GLRenderTexture {
 public:
-    GLRenderTarget();
-    ~GLRenderTarget();
+    // new texture?
+    GLRenderTexture(GLRenderer &);
 
-    void use();
+    // from existing texture
+    GLRenderTexture(GLTexture*);
+
+    ~GLRenderTexture();
+
+    u32 HACK_fbohandle() {
+        return fbohandle;
+    }
+
+    void HACK_SetInternalTexture(GLTexture* newTx) {
+        tex = newTx;
+    }
+
+    void resize(glm::u16vec2);
+    auto size() {
+        return glm::u16vec2(tex->desc.height, tex->desc.width);
+    }
+
+    inline auto* texture() { return tex; }
 
 private:
-    u32 GL_handle;
+    GLTexture* tex = nullptr;
+    u32 fbohandle;
 };
 
 }

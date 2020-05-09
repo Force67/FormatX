@@ -19,8 +19,10 @@
 
 #include "window.h"
 
-#include "editor/editor.h"
 #include "scene/scene.h"
+#include "renderer.h"
+
+#include "ui/editor.h"
 
 namespace graphics {
 class GLRenderer;
@@ -44,9 +46,8 @@ private:
 
     FXWindow window;
 
-    UniquePtr<graphics::GLRenderer> renderer;
-    UniquePtr<editor::FXEditor> editor;
-    UniquePtr<scene::Scene> scene;
+    UniquePtr<ui::Editor> editor;
+    UniquePtr<FXRenderer> renderer;
 
     std::vector<std::string> argv;
     std::vector<pluginLoader*> plugins;

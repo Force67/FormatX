@@ -21,7 +21,7 @@ bool ComparePartialString(InIt begin, InIt end, const char* other) {
 class LogRegistry {
     std::mutex writing_lock;
     std::thread backend_thread;
-    std::vector<std::unique_ptr<logBase>> sinks;
+    std::vector<logBase*> sinks;
     Common::MPSCQueue<logEntry> pending;
     std::chrono::steady_clock::time_point time_origin;
 
@@ -91,12 +91,10 @@ public:
         pending.Push(entry);
     }
 
-    inline logBase* AddSink(std::unique_ptr<logBase> sink) {
+    inline logBase* AddSink(logBase* sink) {
         std::lock_guard lock{writing_lock};
-        auto* poop = sink.get();
-
-        sinks.push_back(std::move(sink));
-        return poop;
+        sinks.push_back(sink);
+        return sink;
     }
 
     inline void RemoveSink(std::string_view name) {
@@ -111,7 +109,7 @@ public:
                                      [&name](const auto& i) { return name == i->getName(); });
         if (it == sinks.end())
             return nullptr;
-        return it->get();
+        return *it;
     }
 };
 
@@ -143,8 +141,8 @@ std::string formatLogEntry(const logEntry& entry) {
                        entry.function, entry.line_num, entry.message);
 }
 
-logBase* addLogSink(std::unique_ptr<logBase> sink) {
-    return LogRegistry::Instance().AddSink(std::move(sink));
+logBase* addLogSink(logBase* sink) {
+    return LogRegistry::Instance().AddSink(sink);
 }
 
 void formatLogMsg(logLevel lvl, uint32_t line, const char* func, const char* fmt,

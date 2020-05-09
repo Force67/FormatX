@@ -47,7 +47,7 @@ public:
 };
 
 std::string formatLogEntry(const logEntry& entry);
-logBase* addLogSink(std::unique_ptr<logBase> sink);
+logBase* addLogSink(logBase* sink);
 logBase* getLogSink(std::string_view name);
 void formatLogMsg(logLevel lvl, uint32_t line, const char* func, const char* fmt,
                   const fmt::format_args& args);

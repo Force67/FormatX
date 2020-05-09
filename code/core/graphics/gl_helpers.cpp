@@ -10,18 +10,41 @@
 #include "gl_helpers.h"
 #include "glad/gl.h"
 
-namespace graphics::helpers {
+#include "graphics/gl_renderer.h"
 
-GLRenderTarget::GLRenderTarget() {
-    glGenFramebuffers(1, &GL_handle);
+namespace gfx {
+
+void GLRenderTarget::create() {
+    glGenFramebuffers(1, &handle);
 }
 
-GLRenderTarget::~GLRenderTarget() {
-    glDeleteFramebuffers(1, &GL_handle);
+void GLRenderTarget::release() {
+    glDeleteFramebuffers(1, &handle);
 }
 
-void GLRenderTarget::use() {
-    glBindFramebuffer(GL_FRAMEBUFFER, GL_handle);
+GLRenderTexture::GLRenderTexture(GLRenderer &render) {
+    glGenFramebuffers(1, &fbohandle);
+    //glBindFramebuffer(GL_FRAMEBUFFER, fbohandle);
 
+    // create an empty texture.
+    TextureDesc desc{};
+    desc.colorFormat = ColorFormat::RGBA;
+
+    tex = render.textureFactory->createTexture(desc, nullptr);
+
+   // glFramebufferTexture2D(GL_FRAMEBUFFER, );
+}
+
+GLRenderTexture::GLRenderTexture(GLTexture* tex) : tex(tex) {
+    glGenFramebuffers(1, &fbohandle);
+}
+
+GLRenderTexture::~GLRenderTexture() {
+    glDeleteFramebuffers(1, &fbohandle);
+}
+
+void GLRenderTexture::resize(glm::u16vec2 newSz) {
+    tex->desc.height = newSz.x;
+    tex->desc.width = newSz.y;
 }
 }

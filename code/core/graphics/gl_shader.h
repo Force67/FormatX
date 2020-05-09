@@ -12,15 +12,12 @@
 #include <array>
 #include <vector>
 
+#include "gfxresource.h"
 #include "gl_renderer.h"
 
-namespace graphics {
+namespace gfx {
 
 class GLRenderer;
-
-enum class ShaderType { Error, Fragment, Vertex, Pixel };
-
-
 class GLShader {
     friend class GLShaderFactory;
 

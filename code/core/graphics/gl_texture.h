@@ -8,12 +8,13 @@
  * in the root of the source tree.
  */
 
-#include <base.h>
 #include <vector>
 
-namespace graphics {
+#include "gfxresource.h"
 
-class GLTexture {
+namespace gfx {
+
+class GLTexture : public Texture {
     friend class GLTextureFactory;
 public:
     ~GLTexture();
@@ -21,10 +22,6 @@ public:
     void* nativeHandle();
 
 public:
-    i32 width;
-    i32 height;
-
-private:
     u32 GL_handle = 0;
 };
 
@@ -33,7 +30,7 @@ public:
     GLTextureFactory();
     ~GLTextureFactory();
 
-    GLTexture* createTexture(u16 width, u16 height, u8* pixels);
+    GLTexture* createTexture(const TextureDesc&, u8* pixels);
     void destroyTexture(GLTexture*);
 
 private:

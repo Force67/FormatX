@@ -10,7 +10,7 @@
 #include "gl_texture.h"
 #include "glad/gl.h"
 
-namespace graphics {
+namespace gfx {
 
 GLTexture::~GLTexture() {
     if (GL_handle)
@@ -36,11 +36,29 @@ GLTextureFactory::~GLTextureFactory() {
     }
 }
 
-GLTexture* GLTextureFactory::createTexture(u16 width, u16 height, u8* pixels) {
+GLTexture* GLTextureFactory::createTexture(const TextureDesc& desc, u8* pixels) {
+
+    i32 glFormat = 0;
+    switch (desc.colorFormat) {
+    case ColorFormat::RED:
+        glFormat = GL_RED;
+        break;
+    case ColorFormat::RGB:
+        glFormat = GL_RGB;
+        break;
+    case ColorFormat::RGBA:
+        glFormat = GL_RGBA;
+        break;
+    case ColorFormat::SRGB:
+        glFormat = GL_SRGB;
+        break;
+    default:
+        BUGCHECK();
+        return nullptr;
+    }
 
     GLTexture* tex = new GLTexture;
-    tex->width = width;
-    tex->height = height;
+    tex->desc = desc;
 
     // backup the last texture
     GLint lastTexture;
@@ -49,9 +67,14 @@ GLTexture* GLTextureFactory::createTexture(u16 width, u16 height, u8* pixels) {
     // upload new texture pixels
     glGenTextures(1, &tex->GL_handle);
     glBindTexture(GL_TEXTURE_2D, tex->GL_handle);
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, glFormat, desc.width, desc.height, 0, glFormat, GL_UNSIGNED_BYTE,
+                 pixels);
 
     // restore texture
     glBindTexture(GL_TEXTURE_2D, lastTexture);

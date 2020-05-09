@@ -10,9 +10,13 @@ project "core"
         "../common",
         "../common/utl",
         "../vendor/fmtlib/include",
+
         "../vendor/glfw/include",
         "../vendor/glad/include",
+
         "../vendor/imgui",
+        "../vendor/imgui_markdown",
+
         "../vendor/glm/",
         "../vendor/assimp/include",
         "../vendor/yaml-cpp/include",

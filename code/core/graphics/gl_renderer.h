@@ -15,7 +15,7 @@
 
 class FXWindow;
 
-namespace graphics {
+namespace gfx {
 
 class GLTextureFactory;
 class GLShaderFactory;
@@ -25,11 +25,12 @@ public:
     explicit GLRenderer(FXWindow& window);
     ~GLRenderer();
 
+protected:
     // controller
     bool init();
     void shutdown();
-    void present();
 
+public:
     void resize(i32, i32);
 public:
     UniquePtr<GLTextureFactory> textureFactory;
@@ -44,4 +45,6 @@ private:
     static void debugCallback(GLenum, GLenum, GLuint, GLenum,
                                GLsizei, const GLchar*, const void*); 
 };
+
+GLRenderer* GetRenderer();
 }

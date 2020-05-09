@@ -40,26 +40,20 @@ bool FXCore::init() {
     if (!window.create(true))
         return false;
 
-    renderer = std::make_unique<graphics::GLRenderer>(window);
+    renderer = std::make_unique<FXRenderer>(window);
     if (!renderer->init()) {
         LOG_ERROR("Failed to create renderer");
         return false;
     }
 
-    editor = std::make_unique<editor::FXEditor>(window);
+    editor = std::make_unique<ui::Editor>(window, *renderer);
     if (!editor->create(*renderer)) {
         LOG_ERROR("Failed to create editor");
         return false;
     }
 
-    scene = std::make_unique<scene::Scene>();
-    if (!scene->create(*renderer)) {
-        LOG_ERROR("Failed to create scene");
-        return false;
-    }
-
     editor->init();
-    __debugbreak();
+
     window.show();
     return true;
 }
@@ -100,13 +94,9 @@ i32 FXCore::exec() {
             step();
             lagTime -= STEP_TIME;
         }
-    
-        scene->draw();
-        editor->update();
-        renderer->present();
 
-        // yield
-        //Sleep(1);
+        // TODO: frame time checks
+        renderer->draw(*editor);
     }
     return 0;
 }
