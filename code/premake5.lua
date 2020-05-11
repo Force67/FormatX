@@ -17,9 +17,24 @@ local function git_info()
     git_commit = string.gsub(temp, '\n$', '')
 end
 
+local function make_version()
+    local major, minor, rev, build
+
+    local f = io.open('buildinfo.txt', 'rb')
+    if f then
+        local content = f:read("*a")
+        f:close()
+
+        major, minor, rev, build = content:match("(%d+).(%d+).(%d+).(%d+)")
+        major, minor, rev, build = 
+        tonumber(major), tonumber(minor), 
+        tonumber(rev), tonumber(build)
+    end
+end
+
 workspace "FormatX"
     configurations { "Debug", "Release" }
-    
+    make_version()
     architecture "x86_64"
     vectorextensions "AVX"
 

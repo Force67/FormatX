@@ -18,6 +18,7 @@ enum class ColorFormat {
     RGB,
     RGBA,
     SRGB,
+    RGBA8,
 };
 
 enum class ShaderType {

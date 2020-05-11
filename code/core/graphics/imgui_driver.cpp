@@ -281,16 +281,31 @@ void ImguiDriver::renderDrawData(ImDrawData* drawData) {
 }
 
 bool ImguiDriver::create(GLRenderer& renderer) {
-    // create ImGui
-    ctx = ImGui::CreateContext();
-    ctx->IO.BackendRendererName = "ImguiDriver";
-    ctx->IO.IniFilename = nullptr;
-    ctx->IO.LogFilename = nullptr;
-    ctx->IO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    ctx->IO.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-    ctx->IO.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // Large meshes
-    ctx->IO.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
-    ctx->IO.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
+
+    auto& io = ctx->IO;
+    io.BackendRendererName = "ImguiDriver";
+    io.BackendFlags = ImGuiBackendFlags_RendererHasVtxOffset | 
+                      ImGuiBackendFlags_HasMouseCursors |
+                      ImGuiBackendFlags_HasSetMousePos;
+
+    // create font atlas
+    u8* pixels;
+    int width, height;
+    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+    TextureDesc desc;
+    desc.colorFormat = ColorFormat::RGBA;
+    desc.width = static_cast<u16>(width);
+    desc.height = static_cast<u16>(height);
+
+    auto* fontAtlas = renderer.textureFactory->createTexture(desc, pixels);
+
+    if (!fontAtlas) {
+        LOG_ERROR("Failed to create font altas");
+        return false;
+    }
+
+    io.Fonts->TexID = static_cast<void*>(fontAtlas);
 
     gfx::GLShaderBuilder<2> builder(renderer);
     builder.add(gfx::ShaderType::Fragment, FRAG_SHADER);
@@ -316,35 +331,6 @@ bool ImguiDriver::create(GLRenderer& renderer) {
     glGenBuffers(1, &vertexBuffer);
     glGenBuffers(1, &arrayList);
 
-    //ImFontConfig config;
-    //config.SizePixels = 20.f;
-    //config.
-
-    auto* font = ctx->IO.Fonts->AddFontFromFileTTF(R"(C:\\Windows\\Fonts\\Verdana.ttf)",
-                                                   FXWindow::getHDPIScale() * 18.f);
-    if (!font) {
-        LOG_ERROR("Unable to load font");
-        return false;
-    }
-
-    // create font atlas
-    u8* pixels;
-    int width, height;
-    ctx->IO.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-
-    TextureDesc desc;
-    desc.colorFormat = ColorFormat::RGBA;
-    desc.height = static_cast<u16>(width);
-    desc.width = static_cast<u16>(width);
-
-    auto* fontAtlas = renderer.textureFactory->createTexture(desc, pixels);
-
-    if (!fontAtlas) {
-        LOG_ERROR("Failed to create font altas");
-        return false;
-    }
-
-    ctx->IO.Fonts->TexID = static_cast<void*>(fontAtlas);
     return true;
 }
 

@@ -25,9 +25,9 @@ public:
     explicit ImguiDriver(FXWindow&);
     ~ImguiDriver();
 
+protected:
     bool create(GLRenderer&);
 
-protected:
     void poll();
     void render();
 

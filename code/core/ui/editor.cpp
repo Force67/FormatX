@@ -8,6 +8,8 @@
  */
 
 #include <glfw/glfw3.h>
+#include <utl/path.h>
+
 #include "editor.h"
 
 #include "imgui_internal.h"
@@ -19,15 +21,25 @@
 #include "graphics/gl_texture.h"
 #include "graphics/gl_helpers.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#include <shellapi.h> // for ShellExecuteA
+#endif
+
 namespace ui {
 
 // constants
 constexpr auto kMaxUrlSize = 128;
 
-static ImGui::MarkdownConfig md_conf;
+static ImGui::MarkdownConfig mdConf;
 
 Editor::Editor(FXWindow& window, gfx::GLRenderer& renderer) : ImguiDriver(window), rend(renderer) {
     logwidget = std::make_unique<LogWidget>();
+}
+
+ImVec2 Editor::center() {
+    auto dispSize = ctx->IO.DisplaySize;
+    return ImVec2(dispSize.x * 0.5f, dispSize.y * 0.5f);
 }
 
 void Editor::updateMenu() {
@@ -50,29 +62,34 @@ void Editor::updateMenu() {
     if (ImGui::BeginMenu("About")) {
         ImGui::MenuItem("Check for Updates");
         ImGui::Separator();
-        ImGui::MenuItem("About " PRJ_NAME, nullptr, &showAbout);
+        if (ImGui::MenuItem("About " PRJ_NAME))
+            showAbout = !showAbout;
         ImGui::EndMenu();
     }
 
     ImGui::Spacing();
     ImGui::Spacing();
-    ImGui::TextColored({0.615f, 0.631f, 0.705f, 1.f}, GIT_BRANCH "@" GIT_COMMIT);
+    ImGui::TextColored({0.615f, 0.631f, 0.705f, 1.f},
+                       ICON_FA_CODE ": unknown " ICON_FA_GITHUB ": " GIT_BRANCH "@" GIT_COMMIT);
     ImGui::EndMainMenuBar();
 }
 
 void Editor::helpAbout() {
-    constexpr float width = 600.f;
-    constexpr float height = 420.f;
-    constexpr float padding = 40.0f;
+    constexpr float k_width = 600.f;
+    constexpr float k_height = 420.f;
+    constexpr char k_appname[] = "About " PRJ_NAME;
 
-    ImGui::SetNextWindowSize({width, height}, ImGuiCond_Once);
-    ImGui::SetNextWindowPos({200.f, 200.f}, ImGuiCond_Once, {0.5f, 0.5f}); // TODO: FIX THIS; center it
-    if (ImGui::Begin("About", &showAbout, ImGuiWindowFlags_NoResize)) {
-        ImGui::BeginChild("##about", {width - 2 * padding, -40.0f}, false);
-        ImGui::Markdown(text::kaboutInfo, sizeof(text::kaboutInfo) - 1, md_conf);
-        ImGui::EndChild();
+    // this is due to the way popups work in imgui
+    // see: https://github.com/ocornut/imgui/issues/331#issuecomment-140055181
+    ImGui::OpenPopup(k_appname);
+
+    ImGui::SetNextWindowSize({k_width, k_height}, ImGuiCond_Once);
+    ImGui::SetNextWindowPos(center(), ImGuiCond_Once, {0.5f, 0.5f});
+    if (ImGui::BeginPopupModal(k_appname, &showAbout,
+                               ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
+        ImGui::Markdown(text::kaboutInfo, sizeof(text::kaboutInfo) - 1, mdConf);
+        ImGui::EndPopup();
     }
-    ImGui::End();
 }
 
 void Editor::updateStats() {
@@ -85,10 +102,6 @@ void Editor::updateStats() {
                  ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings |
                  ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav |
                  ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDocking);
-
-    ImGui::Text("Render Stats");
-    ImGui::Separator();
-
     const float fps = io.Framerate;
 
     ImVec4 col;
@@ -96,7 +109,7 @@ void Editor::updateStats() {
     else if (fps < 30.f) col = {1.f, 0.019f, 0.133f, 1.f};
     else col = {0.133f, 0.921f, 0.f, 1.f};
 
-    ImGui::TextColored(col, "Frame time %.2f\nFPS %.1f", 1000.f / fps, fps);
+    ImGui::TextColored(col, "FPS %.1f\nms %.2f", fps, 1000.f / fps);
     ImGui::End();
 }
 
@@ -113,7 +126,8 @@ void Editor::updateViewer(gfx::GLRenderTexture& renderTarget) {
 
     lastSize = curSize;
 
-    void* target = reinterpret_cast<void*>(renderTarget.texture());
+    //void* target = reinterpret_cast<void*>(renderTarget.texture());
+    void* target = ImGui::GetIO().Fonts->TexID;
     ImGui::Image(target, curSize, ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
 
 #if 0
@@ -221,28 +235,74 @@ void Editor::resize(i32 x, i32 y) {
     ImguiDriver::resize(x, y);
 }
 
-void Editor::init() {
-    auto& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+bool Editor::init() {
+    // create ImGui instance
+    ctx = ImGui::CreateContext();
+    float dpiScale = FXWindow::getHDPIScale();
 
-    // yea this is kinda hacky
+    auto& io = ctx->IO;
+    io.IniFilename = nullptr;
+    io.LogFilename = nullptr;
+    io.ConfigFlags = ImGuiConfigFlags_NavEnableKeyboard | 
+                     ImGuiConfigFlags_NavEnableGamepad |
+                     ImGuiConfigFlags_DockingEnable;
+
+    auto& style = ctx->Style;
+    style.ScaleAllSizes(dpiScale);
+    theme::applyStyle(&style);
+
+    constexpr float k_textscale = 18.f;
+    constexpr float k_iconscale = 14.5f;
+
+    const float iconPixelSize = dpiScale * k_iconscale;
+
+    // TODO: add bold/italic roboto variants for markdown?
+    // TODO: move these?
+    auto path1 = utl::make_app_path(utl::app_path::self, "Roboto-Regular.ttf");
+    auto path2 = utl::make_app_path(utl::app_path::self, "fa-solid-900.ttf");
+    auto path3 = utl::make_app_path(utl::app_path::self, "fa-brands-400.ttf");
+
+    static const ImWchar ranges_icons[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+
+    // TODO: to avoid loading useless stuff, we specify only a few
+    static const ImWchar ranges_brands[] = {ICON_MIN_FAB, ICON_MAX_FAB, 0};
+
+    ImFontConfig config;
+    config.MergeMode = true;
+    config.PixelSnapH = true;
+    config.GlyphMinAdvanceX = iconPixelSize;
+
+    ImFont* textFont = io.Fonts->AddFontFromFileTTF(path1.c_str(), dpiScale * k_textscale);
+    ImFont* iconFont = io.Fonts->AddFontFromFileTTF(path2.c_str(), iconPixelSize, &config, ranges_icons);
+    ImFont* brandFont = io.Fonts->AddFontFromFileTTF(path3.c_str(), iconPixelSize, &config, ranges_brands);
+
+    if (!textFont || !iconFont || !brandFont) {
+        LOG_ERROR("Failed to load required fonts");
+        return false;
+    }
+
+    if (!ImguiDriver::create(rend)) {
+        return false;
+    }
+
     window.bindInput();
-
-    // init style
-    ImGuiStyle* style = &ImGui::GetStyle();
-    style->ScaleAllSizes(FXWindow::getHDPIScale());
-
-    // apply our default theme
-    theme::applyStyle(style);
-
-    md_conf.headingFormats[0].separator = true;
 
     ImFontConfig h1Conf;
     h1Conf.SizePixels = 26.0f;
-    md_conf.headingFormats[0].font = io.Fonts->Fonts[0];
-    md_conf.linkCallback = [](ImGui::MarkdownLinkCallbackData data) {
 
+    // configure markdown engine
+    mdConf.headingFormats[0].separator = true;
+    mdConf.headingFormats[0].font = textFont;
+    mdConf.linkIcon = ICON_FA_LINK;
+    mdConf.linkCallback = [](ImGui::MarkdownLinkCallbackData data) {
+        std::string url(data.link, data.linkLength);
+#ifdef _WIN32
+        if (!data.isImage) {
+            ShellExecuteA(NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+        }
+#endif
     };
-   // md_conf.linkIcon = ICON_FA_LINK;
+
+    return true;
 }
 }

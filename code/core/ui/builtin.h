@@ -13,17 +13,22 @@
 
 #include <imgui.h>
 
+#include "_res/brand_icons_fontawesome_5.h"
+#include "_res/icons_fontawesome_5.h"
+
 namespace ui::text {
 
-constexpr char kaboutInfo[] = u8R"(# About FormatX
-FormatX is a customizable Asset Editor for multiple games, developed by Force67.
+constexpr char kaboutInfo[] = u8R"(
+                                        
+          Source: [github](https://github.com/Force67/FormatX)
 
-Source: [github](https://github.com/Force67/FormatX)
+# Implemented with:
 
-Implemented with:
-
-- Dear ImGui: [xoxo2](https://github.com/ocornut/imgui)
-- ImguiMarkdown: [xoxo](https://github.com/juliettef/imgui_markdown)
+* Dear ImGui: [https://github.com/ocornut/imgui](https://github.com/ocornut/imgui)
+* ImGuiColorTextEdit: [https://github.com/BalazsJako/ImGuiColorTextEdit](https://github.com/BalazsJako/ImGuiColorTextEdit)
+* ImGuiMarkdown: [https://github.com/juliettef/imgui_markdown](https://github.com/juliettef/imgui_markdown)
+* IconFontCppHeaders: [https://github.com/juliettef/IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
+* Font Awesome 4: [https://github.com/FortAwesome/Font-Awesome/tree/fa-4](https://github.com/FortAwesome/Font-Awesome/tree/fa-4)
 )";
 }
 

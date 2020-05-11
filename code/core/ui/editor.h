@@ -22,7 +22,7 @@ class Editor final : public gfx::ImguiDriver {
 public:
     explicit Editor(FXWindow&, /*HACK*/ gfx::GLRenderer&);
 
-    void init();
+    bool init();
     void frame(gfx::GLRenderTexture&);
 
     void resize(i32, i32);
@@ -37,6 +37,8 @@ private:
     void updateViewer(gfx::GLRenderTexture&);
 
 private:
+    ImVec2 center();
+
     gfx::GLRenderer& rend;
 
     bool showLog = true;

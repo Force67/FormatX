@@ -47,12 +47,10 @@ bool FXCore::init() {
     }
 
     editor = std::make_unique<ui::Editor>(window, *renderer);
-    if (!editor->create(*renderer)) {
+    if (!editor->init()) {
         LOG_ERROR("Failed to create editor");
         return false;
     }
-
-    editor->init();
 
     window.show();
     return true;

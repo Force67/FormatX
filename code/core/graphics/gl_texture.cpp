@@ -10,6 +10,8 @@
 #include "gl_texture.h"
 #include "glad/gl.h"
 
+#include <logger/logger.h>
+
 namespace gfx {
 
 GLTexture::~GLTexture() {
@@ -36,7 +38,7 @@ GLTextureFactory::~GLTextureFactory() {
     }
 }
 
-GLTexture* GLTextureFactory::createTexture(const TextureDesc& desc, u8* pixels) {
+GLTexture* GLTextureFactory::createTexture(const TextureDesc& desc, u8* pixels /*its LEGAL for "pixels" to be null*/) {
 
     i32 glFormat = 0;
     switch (desc.colorFormat) {
@@ -73,12 +75,14 @@ GLTexture* GLTextureFactory::createTexture(const TextureDesc& desc, u8* pixels) 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, glFormat, desc.width, desc.height, 0, glFormat, GL_UNSIGNED_BYTE,
+    glTexImage2D(GL_TEXTURE_2D, 0, glFormat, 
+        static_cast<GLsizei>(desc.width), 
+        static_cast<GLsizei>(desc.height), 0,
+                 glFormat, GL_UNSIGNED_BYTE,
                  pixels);
 
     // restore texture
     glBindTexture(GL_TEXTURE_2D, lastTexture);
-    
     textures.push_back(tex);
     return tex;
 }
